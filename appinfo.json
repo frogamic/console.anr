@@ -1,0 +1,18 @@
+{
+  "uuid": "23e1e5fc-0693-4d5f-98ae-d4c7460fdcb8",
+  "shortName": "Console.ANR",
+  "longName": "Console.ANR",
+  "companyName": "frogamic",
+  "versionLabel": "0.1",
+  "sdkVersion": "3",
+  "targetPlatforms": ["aplite", "basalt"],
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": []
+  }
+}
