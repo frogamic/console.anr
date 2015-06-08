@@ -32,7 +32,7 @@ static GColor faction_get_color(int faction) {
         case 3: return GColorImperialPurple;
         case 4: return GColorChromeYellow;
         case 5: return GColorKellyGreen;
-        case 6: return GColorArmyGreen;
+        case 6: return GColorMidnightGreen;
     };
 #endif
     return GColorWhite;
