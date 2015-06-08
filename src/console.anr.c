@@ -12,6 +12,17 @@ static Window *window;
 static CardView* cardView;
 static int selectedFaction = 0;
 
+static GColor faction_get_fg(int faction) {
+#ifdef PBL_COLOR
+    switch (faction) {
+        case 2: return GColorWhite;
+        case 3: return GColorWhite;
+        case 6: return GColorWhite;
+    };
+#endif
+    return GColorBlack;
+}
+
 static GColor faction_get_color(int faction) {
 #ifdef PBL_COLOR
     switch (faction) {
@@ -60,7 +71,9 @@ static int make_card(CardView* cv, Direction d) {
     text_layer_set_background_color(sublayers[1], GColorClear);
     text_layer_set_text_alignment(sublayers[0], GTextAlignmentCenter);
     text_layer_set_text_alignment(sublayers[1], GTextAlignmentCenter);
-    // Set font of logo layer
+    // Set font and color.
+    text_layer_set_text_color(sublayers[0], faction_get_fg(selectedFaction));
+    text_layer_set_text_color(sublayers[1], faction_get_fg(selectedFaction));
     text_layer_set_font(sublayers[0], fonts_load_custom_font(resource_get_handle(RESOURCE_ID_CIND_30)));
     text_layer_set_font(sublayers[1], fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FACTION_LOGOS_47)));
     // Set name and logo in layers.
