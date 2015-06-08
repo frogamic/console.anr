@@ -2,12 +2,17 @@
 #include "gameWindow.h"
 #include "cardView.h"
 
+#define FACTIONS 7
+
 static Window *window;
 static TextLayer *text_layer;
-static char* factionSymbols[] = {"\ue605", "\ue612", "\ue005", "\ue602", "\ue60b", "\ue613", "\ue607"};
+static const char* factionSymbols[] = {"\ue605", "\ue612", "\ue005", "\ue602", "\ue60b", "\ue613", "\ue607"};
+static const char* factionNames[] = {"Anarch", "Criminal", "Jinteki", "Haas-Bioroid", "NBN", "Shaper", "Weyland"};
+static const char* factionColors[] = {GColorRed, GColorBlue, GColorDarkCandyAppleRed, GColorImperialPurple, GColorChromeYellow, GColorKellyGreen, GColorArmyGreen};
+static int selectedFaction = 0;
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-    gameWindow_init (GColorBlack, 4);
+    gameWindow_init (factionColors[selectedFaction], 4);
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
