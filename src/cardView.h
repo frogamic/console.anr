@@ -9,8 +9,6 @@ typedef struct {
     Layer* layerParent;
     Layer* layerCurrent;
     Layer* layerNext;
-    void (*destroyCurrent)(void*);
-    void (*destroyNext)(void*);
     PropertyAnimation* animation;
 } CardView;
 
