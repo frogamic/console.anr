@@ -47,7 +47,7 @@ static int make_card(CardView* cv, Direction d) {
     const char* factionNames[] = {"Anarch", "Criminal", "Jinteki", "Haas-Bioroid", "NBN", "Shaper", "Weyland"};
     TextLayer** sublayers = malloc(sizeof(void*) * 3);
     Layer* layer = CardView_add_card(cv, d, faction_get_color(selectedFaction), destroy_card, sublayers);
-    GRect frame = layer_get_frame(layer);
+    GRect frame = layer_get_frame(window_get_root_layer(window));
     // Create layers for text and logo.
     frame.origin.y = TEXT_Y;
     frame.size.h = TEXT_HEIGHT;
@@ -55,10 +55,13 @@ static int make_card(CardView* cv, Direction d) {
     frame.origin.y = LOGO_Y;
     frame.size.h = LOGO_HEIGHT;
     sublayers[1] = text_layer_create(frame);
-    // Set both text layers to transparent.
+    // Set both text layers to transparent and centered.
     text_layer_set_background_color(sublayers[0], GColorClear);
     text_layer_set_background_color(sublayers[1], GColorClear);
+    text_layer_set_text_alignment(sublayers[0], GTextAlignmentCenter);
+    text_layer_set_text_alignment(sublayers[1], GTextAlignmentCenter);
     // Set font of logo layer
+    text_layer_set_font(sublayers[0], fonts_load_custom_font(resource_get_handle(RESOURCE_ID_CIND_30)));
     text_layer_set_font(sublayers[1], fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FACTION_LOGOS_47)));
     // Set name and logo in layers.
     text_layer_set_text(sublayers[0], factionNames[selectedFaction]);

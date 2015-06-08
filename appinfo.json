@@ -15,6 +15,12 @@
   "resources": {
     "media": [
     {
+      "characterRegex": "[-ABCJHNSWacdehiklmnprty]",
+      "type": "font",
+      "name": "CIND_30",
+      "file": "CIND.ttf"
+    },
+    {
       "characterRegex": "[\ue600\ue608\ue611]",
       "type": "font",
       "name": "GAME_SYMBOLS_24",
