@@ -11,7 +11,26 @@
 typedef struct {
     void (*destroy)(void*);
     void* context;
+    GColor bg;
 } Card;
+
+static void fill_update_proc(Layer* layer, GContext* ctx) {
+    Card* c = layer_get_data(layer);
+    graphics_context_set_fill_color(ctx, c->bg);
+    graphics_fill_rect(ctx,layer_get_frame(layer), 0, GCornerNone);
+}
+
+static void animation_stop (Animation *animation, bool finished, void* context) {
+    CardView* cv = (CardView*) context;
+    // Destroy the previous current card.
+    CardView_destroy_card(cv->layerCurrent);
+    // Make the new card current.
+    cv->layerCurrent = cv->layerNext;
+    cv->layerNext = NULL;
+#ifdef PBL_PLATFORM_APLITE
+    animation_destroy((Animation*)animation);
+#endif
+}
 
 CardView* CardView_create(Layer* parent) {
     CardView* cv = malloc(sizeof(CardView));
@@ -46,6 +65,9 @@ Layer* CardView_add_card(CardView* cv, Direction d, GColor bg, void (*destroyCal
     Card* card = layer_get_data(layer);
     card->destroy = destroyCallback;
     card->context = context;
+    // Set the draw method and bg color of the new card.
+    card->bg = bg;
+    layer_set_update_proc(layer, (LayerUpdateProc) fill_update_proc);
 
     // If there is still an animation running destroy it.
     if (cv->animation)
@@ -71,18 +93,6 @@ Layer* CardView_add_card(CardView* cv, Direction d, GColor bg, void (*destroyCal
     // Finally replace the layer pointer and return it.
     cv->layerNext = layer;
     return layer;
-}
-
-static void animation_stop (Animation *animation, bool finished, void* context) {
-    CardView* cv = (CardView*) context;
-    // Destroy the previous current card.
-    CardView_destroy_card(cv->layerCurrent);
-    // Make the new card current.
-    cv->layerCurrent = cv->layerNext;
-    cv->layerNext = NULL;
-#ifdef PBL_PLATFORM_APLITE
-    animation_destroy((Animation*)animation);
-#endif
 }
 
 int CardView_animate(CardView* cv) {
