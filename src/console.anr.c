@@ -11,14 +11,24 @@
 static Window *window;
 static CardView* cardView;
 static int selectedFaction = 0;
+
+static GColor faction_get_color(int faction) {
 #ifdef PBL_COLOR
-static const GColor factionColors[] = {GColorRed, GColorBlue, GColorDarkCandyAppleRed, GColorImperialPurple, GColorChromeYellow, GColorKellyGreen, GColorArmyGreen};
+    switch (faction) {
+        case 1: return GColorRed;
+        case 2: return GColorBlue;
+        case 3: return GColorDarkCandyAppleRed;
+        case 4: return GColorImperialPurple;
+        case 5: return GColorChromeYellow;
+        case 6: return GColorKellyGreen;
+        case 7: return GColorArmyGreen;
+    };
 #endif
+    return GColorWhite;
+}
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-#ifdef PBL_COLOR
-    gameWindow_init (factionColors[selectedFaction], 4);
-#endif
+    gameWindow_init (faction_get_color(selectedFaction), 4);
 }
 
 static void destroy_card(void* context) {
@@ -34,11 +44,7 @@ static int make_card(CardView* cv, Direction d) {
     const char* factionLogos[] = {"\ue605", "\ue612", "\ue005", "\ue602", "\ue60b", "\ue613", "\ue607"};
     const char* factionNames[] = {"Anarch", "Criminal", "Jinteki", "Haas-Bioroid", "NBN", "Shaper", "Weyland"};
     TextLayer** sublayers = malloc(sizeof(void*) * 3);
-#ifdef PBL_COLOR
-    Layer* layer = CardView_add_card(cv, d, factionColors[selectedFaction], destroy_card, sublayers);
-#else
-    Layer* layer = CardView_add_card(cv, d, GColorWhite, destroy_card, sublayers);
-#endif
+    Layer* layer = CardView_add_card(cv, d, faction_get_color(selectedFaction), destroy_card, sublayers);
     GRect frame = layer_get_frame(layer);
     // Create layers for text and logo.
     frame.origin.y = TEXT_Y;
