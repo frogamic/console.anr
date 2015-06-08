@@ -15,13 +15,13 @@ static int selectedFaction = 0;
 static GColor faction_get_color(int faction) {
 #ifdef PBL_COLOR
     switch (faction) {
-        case 1: return GColorRed;
-        case 2: return GColorBlue;
-        case 3: return GColorDarkCandyAppleRed;
-        case 4: return GColorImperialPurple;
-        case 5: return GColorChromeYellow;
-        case 6: return GColorKellyGreen;
-        case 7: return GColorArmyGreen;
+        case 0: return GColorRed;
+        case 1: return GColorBlue;
+        case 2: return GColorDarkCandyAppleRed;
+        case 3: return GColorImperialPurple;
+        case 4: return GColorChromeYellow;
+        case 5: return GColorKellyGreen;
+        case 6: return GColorArmyGreen;
     };
 #endif
     return GColorWhite;
