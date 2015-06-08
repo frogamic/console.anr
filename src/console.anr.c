@@ -33,9 +33,11 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 
 static void destroy_card(void* context) {
     TextLayer** layer = context;
-    while (layer) {
-        text_layer_destroy(*layer);
-        ++layer;
+    int i = 0;
+    while (layer[i]) {
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "deleting sublayer %p", layer[i]);
+        text_layer_destroy(layer[i]);
+        ++i;
     }
     free(context);
 }

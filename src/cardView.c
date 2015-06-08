@@ -110,7 +110,7 @@ int CardView_animate(CardView* cv) {
     // Add the new layer as a child
     // If this is the first card then no animation is necessary, simply move next to current.
     if (!cv->layerCurrent) {
-        APP_LOG(APP_LOG_LEVEL_INFO, "First layer %p added", cv->layerNext);
+        APP_LOG(APP_LOG_LEVEL_INFO, "First card %p added", cv->layerNext);
         cv->layerCurrent = cv->layerNext;
         cv->layerNext = NULL;
         // Set the new card's frame to window size.
