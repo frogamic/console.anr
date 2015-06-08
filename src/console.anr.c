@@ -72,7 +72,7 @@ static int make_card(CardView* cv, Direction d) {
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-    selectedFaction = (selectedFaction - 1) % FACTIONS;
+    selectedFaction = (selectedFaction + FACTIONS - 1) % FACTIONS;
     make_card(cardView, FROM_ABOVE);
 }
 
