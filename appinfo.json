@@ -23,7 +23,7 @@
     {
       "characterRegex": "[\ue005\ue602\ue605\ue607\ue60b\ue612\ue613]",
       "type": "font",
-      "name": "FACTION_LOGOS_52",
+      "name": "FACTION_LOGOS_47",
       "file": "netrunner.ttf"
     }
     ]
