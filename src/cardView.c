@@ -103,21 +103,27 @@ Layer* CardView_add_card(CardView* cv, Direction d, GColor bg, void (*destroyCal
 int CardView_animate(CardView* cv) {
     // Check that an animation isn't already running.
     if (cv->animation) return 1;
+    // Get the target position for the new card.
+    GRect target = layer_get_frame(cv->layerParent);
     // Add the new layer as a child
     // If this is the first card then no animation is necessary, simply move next to current.
     if (!cv->layerCurrent) {
+        APP_LOG(APP_LOG_LEVEL_INFO, "First layer %p added", cv->layerNext);
         cv->layerCurrent = cv->layerNext;
         cv->layerNext = NULL;
+        // Set the new card's frame to window size.
+        layer_set_frame(cv->layerCurrent, target);
         // Add the new card layer to the parent layer.
         layer_add_child(cv->layerParent, cv->layerCurrent);
     }
     else {
-        GRect target = layer_get_frame(cv->layerParent);
+        APP_LOG(APP_LOG_LEVEL_INFO, "Animating layer %p", cv->layerNext);
         layer_insert_below_sibling(cv->layerNext, cv->layerCurrent);
         cv->animation = property_animation_create_layer_frame(cv->layerNext, NULL, &target);
         animation_set_duration((Animation*)cv->animation, ANIMATION_DURATION);
         animation_set_handlers((Animation*)cv->animation, (AnimationHandlers) {
                 .stopped = (AnimationStoppedHandler) animation_stop }, cv);
+        layer_add_child(cv->layerParent, cv->layerNext);
         animation_schedule((Animation*)cv->animation);
     }
     return 0;
