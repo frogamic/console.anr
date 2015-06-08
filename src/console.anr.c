@@ -3,10 +3,10 @@
 #include "cardView.h"
 
 #define FACTIONS 7
-#define TEXT_Y 72
-#define TEXT_HEIGHT 30
-#define LOGO_Y 10
-#define LOGO_HEIGHT 40
+#define TEXT_Y 110
+#define TEXT_HEIGHT 40
+#define LOGO_Y 30
+#define LOGO_HEIGHT 45
 
 static Window *window;
 static CardView* cardView;
@@ -44,7 +44,7 @@ static void destroy_card(void* context) {
 
 static int make_card(CardView* cv, Direction d) {
     const char* factionLogos[] = {"\ue605", "\ue612", "\ue005", "\ue602", "\ue60b", "\ue613", "\ue607"};
-    const char* factionNames[] = {"Anarch", "Criminal", "Jinteki", "Haas-Bioroid", "NBN", "Shaper", "Weyland"};
+    const char* factionNames[] = {"ANARCH", "CRIMINAL", "JINTEKI", "HAAS-\nBIOROID", "NBN", "SHAPER", "WEYLAND"};
     TextLayer** sublayers = malloc(sizeof(void*) * 3);
     Layer* layer = CardView_add_card(cv, d, faction_get_color(selectedFaction), destroy_card, sublayers);
     GRect frame = layer_get_frame(window_get_root_layer(window));
@@ -61,7 +61,8 @@ static int make_card(CardView* cv, Direction d) {
     text_layer_set_text_alignment(sublayers[0], GTextAlignmentCenter);
     text_layer_set_text_alignment(sublayers[1], GTextAlignmentCenter);
     // Set font of logo layer
-    text_layer_set_font(sublayers[0], fonts_load_custom_font(resource_get_handle(RESOURCE_ID_CIND_30)));
+    text_layer_set_font(sublayers[0], fonts_load_custom_font(resource_get_handle(RESOURCE_ID_CIND_20)));
+    text_layer_set_overflow_mode(sublayers[0], GTextOverflowModeWordWrap);
     text_layer_set_font(sublayers[1], fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FACTION_LOGOS_47)));
     // Set name and logo in layers.
     text_layer_set_text(sublayers[0], factionNames[selectedFaction]);
