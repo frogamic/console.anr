@@ -4,9 +4,9 @@
 
 #define FACTIONS 7
 #define TEXT_Y 110
-#define TEXT_HEIGHT 40
+#define TEXT_HEIGHT 50
 #define LOGO_Y 30
-#define LOGO_HEIGHT 45
+#define LOGO_HEIGHT 55
 
 static Window *window;
 static CardView* cardView;
@@ -60,7 +60,7 @@ static int make_card(CardView* cv, Direction d) {
     Layer* layer = CardView_add_card(cv, d, faction_get_color(selectedFaction), destroy_card, sublayers);
     GRect frame = layer_get_frame(window_get_root_layer(window));
     // Create layers for text and logo.
-    frame.origin.y = TEXT_Y;
+    frame.origin.y = frame.size.h - TEXT_HEIGHT;
     frame.size.h = TEXT_HEIGHT;
     sublayers[0] = text_layer_create(frame);
     frame.origin.y = LOGO_Y;
