@@ -5,7 +5,6 @@
 
 #include "cardView.h"
 
-
 #define ANIMATION_DURATION 500
 
 typedef struct {
@@ -27,6 +26,7 @@ static void animation_stop (Animation *animation, bool finished, void* context) 
     // Make the new card current.
     cv->layerCurrent = cv->layerNext;
     cv->layerNext = NULL;
+    cv->animation = NULL;
 #ifdef PBL_PLATFORM_APLITE
     animation_destroy((Animation*)animation);
 #endif
@@ -60,6 +60,7 @@ Layer* CardView_add_card(CardView* cv, Direction d, GColor bg, void (*destroyCal
         APP_LOG(APP_LOG_LEVEL_ERROR, "Unable to create new card for CardView %p", cv);
         return NULL;
     }
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Created new card %p", layer);
     
     // Get the pointer to the data to store the callback and context.
     Card* card = layer_get_data(layer);
@@ -74,10 +75,13 @@ Layer* CardView_add_card(CardView* cv, Direction d, GColor bg, void (*destroyCal
     {
         animating = true;
         animation_destroy((Animation*)cv->animation);
+        APP_LOG(APP_LOG_LEVEL_INFO, "Animation %p already running, ending", cv->animation);
+        cv->animation = NULL;
     }
     // If there is already a next layer that had begun moving, move it into place.
     if (cv->layerNext && animating)
     {
+        APP_LOG(APP_LOG_LEVEL_INFO, "Movement in progress, repositioning %p, replacing %p", cv->layerNext, cv->layerCurrent);
         // Destroy old layer.
         CardView_destroy_card(cv->layerCurrent);
         // Replace the current layer with the new layer.
@@ -87,6 +91,7 @@ Layer* CardView_add_card(CardView* cv, Direction d, GColor bg, void (*destroyCal
     }
     // Otherwise if the next layer hasn't begun moving onscreen destroy it.
     else if( cv->layerNext && !animating) {
+        APP_LOG(APP_LOG_LEVEL_INFO, "Layer %p found offscreen, removing", cv->layerNext);
         CardView_destroy_card(cv->layerNext);
     }
 
@@ -140,6 +145,6 @@ void CardView_destroy(CardView* cv) {
     if(cv->layerCurrent) {
         CardView_destroy_card(cv->layerCurrent);
     }
-    
+    free(cv);
 }
 
