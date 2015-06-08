@@ -1,37 +1,44 @@
 {
-  "uuid": "23e1e5fc-0693-4d5f-98ae-d4c7460fdcb8",
-  "shortName": "Console.ANR",
-  "longName": "Console.ANR",
-  "companyName": "frogamic",
-  "versionLabel": "0.1",
-  "sdkVersion": "3",
-  "targetPlatforms": ["aplite", "basalt"],
-  "watchapp": {
-    "watchface": false
-  },
-  "appKeys": {
-    "dummy": 0
-  },
-  "resources": {
-    "media": [
-    {
-      "characterRegex": "[-ABCJHNSWacdehiklmnprty]",
-      "type": "font",
-      "name": "CIND_30",
-      "file": "CIND.ttf"
+    "appKeys": {
+        "dummy": 0
     },
-    {
-      "characterRegex": "[\ue600\ue608\ue611]",
-      "type": "font",
-      "name": "GAME_SYMBOLS_24",
-      "file": "netrunner.ttf"
+    "capabilities": [
+        ""
+    ],
+    "companyName": "frogamic",
+    "longName": "Console.ANR",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "characterRegex": "[\ue005\ue602\ue605\ue607\ue60b\ue612\ue613]",
+                "file": "fonts/netrunner.ttf",
+                "name": "FACTION_LOGOS_47",
+                "type": "font"
+            },
+            {
+                "characterRegex": "[\ue600\ue608\ue611]",
+                "file": "fonts/netrunner.ttf",
+                "name": "GAME_SYMBOLS_24",
+                "type": "font"
+            },
+            {
+                "characterRegex": "[-ABCDEHIJKLMNPRSTWY0-9]",
+                "file": "fonts/CIND.ttf",
+                "name": "CIND_20",
+                "type": "font"
+            }
+        ]
     },
-    {
-      "characterRegex": "[\ue005\ue602\ue605\ue607\ue60b\ue612\ue613]",
-      "type": "font",
-      "name": "FACTION_LOGOS_47",
-      "file": "netrunner.ttf"
+    "sdkVersion": "3",
+    "shortName": "Console.ANR",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
+    "uuid": "23e1e5fc-0693-4d5f-98ae-d4c7460fdcb8",
+    "versionLabel": "0.1",
+    "watchapp": {
+        "watchface": false
     }
-    ]
-  }
 }
