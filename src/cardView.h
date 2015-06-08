@@ -17,10 +17,10 @@ typedef struct {
 typedef enum {FROM_ABOVE, FROM_BELOW} Direction;
 
 /** Initialises the CardView and displays the initial card
- *  \param  parent  A pointer to the layer on which to draw the cards.
+ *  \param  parent  A pointer to the window in which to draw the cards.
  *  \return         A pointer to the CardView object created on the heap.
  */
-CardView* CardView_create(Layer* parent);
+CardView* CardView_create(Window* w);
 
 /** Adds a new offscreen layer to the CardView, overwriting the existing offscreen layer if present.
  *  \param  cv              A pointer to the CardView to add the new card to

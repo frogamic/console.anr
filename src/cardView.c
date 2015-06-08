@@ -32,15 +32,15 @@ static void animation_stop (Animation *animation, bool finished, void* context) 
 #endif
 }
 
-CardView* CardView_create(Layer* parent) {
+CardView* CardView_create(Window* w) {
     CardView* cv = malloc(sizeof(CardView));
     if (cv) {
-        cv->layerParent = parent;
+        cv->layerParent = window_get_root_layer(w);
         cv->layerNext = NULL;
         cv->layerCurrent = NULL;
         cv->animation = NULL;
     } else {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "Unable to create CardView with parent %p", parent);
+        APP_LOG(APP_LOG_LEVEL_ERROR, "Unable to create CardView with parent %p", w);
     }
     return cv;
 }
