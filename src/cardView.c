@@ -130,6 +130,7 @@ int CardView_animate(CardView* cv) {
 }
 
 void CardView_destroy_card(Layer* layer) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "destroying layer %p", layer);
     Card* c = layer_get_data(layer);
     // Just in case there is no data
     if (!c)
@@ -141,6 +142,7 @@ void CardView_destroy_card(Layer* layer) {
 }
 
 void CardView_destroy(CardView* cv) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "destroying CardView %p", cv);
     if (cv->animation)
     {
         animation_destroy((Animation*)cv->animation);
