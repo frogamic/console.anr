@@ -20,21 +20,23 @@ static void fill_update_proc(Layer* layer, GContext* ctx) {
 }
 
 static void animation_stop (Animation *animation, bool finished, void* context) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "Animation %p stopped", animation);
     CardView* cv = (CardView*) context;
     // Destroy the previous current card.
     CardView_destroy_card(cv->layerCurrent);
     // Make the new card current.
     cv->layerCurrent = cv->layerNext;
     cv->layerNext = NULL;
-    cv->animation = NULL;
 #ifdef PBL_PLATFORM_APLITE
     animation_destroy((Animation*)animation);
 #endif
+    cv->animation = NULL;
 }
 
 CardView* CardView_create(Window* w) {
     CardView* cv = malloc(sizeof(CardView));
     if (cv) {
+        APP_LOG(APP_LOG_LEVEL_INFO, "CardView %p created", cv);
         cv->layerParent = window_get_root_layer(w);
         cv->layerNext = NULL;
         cv->layerCurrent = NULL;
@@ -124,6 +126,7 @@ int CardView_animate(CardView* cv) {
         animation_set_handlers((Animation*)cv->animation, (AnimationHandlers) {
                 .stopped = (AnimationStoppedHandler) animation_stop }, cv);
         layer_add_child(cv->layerParent, cv->layerNext);
+        APP_LOG(APP_LOG_LEVEL_INFO, "Animation %p starting", cv->animation);
         animation_schedule((Animation*)cv->animation);
     }
     return 0;
