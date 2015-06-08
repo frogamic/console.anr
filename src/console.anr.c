@@ -29,7 +29,7 @@ static void window_load(Window *window) {
 
   text_layer = text_layer_create((GRect) { .origin = { 0, 0 }, .size = { bounds.size.w, 60 } });
   text_layer_set_text(text_layer, factionSymbols[3]);
-  text_layer_set_font(text_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FACTION_LOGOS_56)));
+  text_layer_set_font(text_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FACTION_LOGOS_52)));
   text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(text_layer));
 }
