@@ -19,6 +19,7 @@ static int selectedFaction = 0;
 static GColor faction_get_fg(int faction) {
 #ifdef PBL_COLOR
     switch (faction) {
+        case 1: return GColorWhite;
         case 2: return GColorWhite;
         case 3: return GColorWhite;
         case 6: return GColorWhite;
