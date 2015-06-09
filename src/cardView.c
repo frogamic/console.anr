@@ -22,16 +22,19 @@ static void fill_update_proc(Layer* layer, GContext* ctx) {
 }
 
 static void animation_stop (Animation *animation, bool finished, void* context) {
-    APP_LOG(APP_LOG_LEVEL_INFO, "Animation %p stopped", animation);
     CardView* cv = (CardView*) context;
     // Destroy the previous current card.
     CardView_destroy_card(cv->layerCurrent);
     // Make the new card current.
     cv->layerCurrent = cv->layerNext;
     cv->layerNext = NULL;
-#ifdef PBL_PLATFORM_APLITE
+    // If the animation is not finished, the new layer must be moved to the correct position.
+    if (!finished) {
+        APP_LOG(APP_LOG_LEVEL_INFO, "Animation ending prematurely, repositioning layer %p", cv->layerCurrent);
+        layer_set_frame(cv->layerCurrent, layer_get_frame(cv->layerParent));
+    }
     animation_destroy((Animation*)animation);
-#endif
+    APP_LOG(APP_LOG_LEVEL_INFO, "Animation %p destroyed", animation);
     cv->animation = NULL;
 }
 
@@ -52,7 +55,6 @@ CardView* CardView_create(Window* w) {
 Layer* CardView_add_card(CardView* cv, Direction d, GColor bg, void (*destroyCallback)(void*), void* context) {
     // y positions for above and below the screen.
     const int ypos[] = {ABOVE_SCREEN, BELOW_SCREEN};
-    bool animating = false;
     GRect cardFrame = layer_get_frame(cv->layerParent);
     // Put the frame offscreen in the specified direction.
     cardFrame.origin.y = ypos[d];
@@ -77,24 +79,11 @@ Layer* CardView_add_card(CardView* cv, Direction d, GColor bg, void (*destroyCal
     // If there is still an animation running destroy it.
     if (cv->animation)
     {
-        animating = true;
-        animation_destroy((Animation*)cv->animation);
         APP_LOG(APP_LOG_LEVEL_INFO, "Animation %p already running, ending", cv->animation);
-        cv->animation = NULL;
-    }
-    // If there is already a next layer that had begun moving, move it into place.
-    if (cv->layerNext && animating)
-    {
-        APP_LOG(APP_LOG_LEVEL_INFO, "Movement in progress, repositioning %p, replacing %p", cv->layerNext, cv->layerCurrent);
-        // Destroy old layer.
-        CardView_destroy_card(cv->layerCurrent);
-        // Replace the current layer with the new layer.
-        cv->layerCurrent = cv->layerNext;
-        // Reposition the new current layer which is not in place yet.
-        layer_set_frame(cv->layerCurrent, layer_get_frame(cv->layerParent));
+        animation_destroy((Animation*)cv->animation);
     }
     // Otherwise if the next layer hasn't begun moving onscreen destroy it.
-    else if( cv->layerNext && !animating) {
+    else if( cv->layerNext) {
         APP_LOG(APP_LOG_LEVEL_INFO, "Layer %p found offscreen, removing", cv->layerNext);
         CardView_destroy_card(cv->layerNext);
     }
