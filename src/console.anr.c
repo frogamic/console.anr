@@ -2,7 +2,11 @@
 #include "gameWindow.h"
 #include "cardView.h"
 
+#ifdef PBL_COLOR
 #define FACTIONS 7
+#else
+#define FACTIONS 2
+#endif
 #define TEXT_Y 110
 #define TEXT_HEIGHT 50
 #define LOGO_Y 30
@@ -54,8 +58,13 @@ static void destroy_card(void* context) {
 }
 
 static int make_card(CardView* cv, Direction d) {
+#ifdef PBL_COLOR
     const char* factionLogos[] = {"\ue605", "\ue612", "\ue005", "\ue602", "\ue60b", "\ue603", "\ue607"};
     const char* factionNames[] = {"ANARCH", "CRIMINAL", "JINTEKI", "HAAS-\nBIOROID", "NBN", "SHAPER", "WEYLAND"};
+#else
+    const char* factionLogos[] = {"\ue605\ue612\ue613", "\ue005\ue602\ue60b\ue607"};
+    const char* factionNames[] = {"Runner", "Corporation"};
+#endif
     TextLayer** sublayers = malloc(sizeof(void*) * 3);
     Layer* layer = CardView_add_card(cv, d, faction_get_color(selectedFaction), destroy_card, sublayers);
     GRect frame = layer_get_frame(window_get_root_layer(window));
