@@ -10,6 +10,7 @@
 #define LOGO_Y 25
 #define LOGO_HEIGHT 50
 #define TEXT_HEIGHT 50
+#define HB_TEXTHEIGHT 20
 
 static Window *window;
 static CardView* cardView;
@@ -77,7 +78,7 @@ static int make_card(CardView* cv, Direction d) {
     // Create layers for text and logo.
     frame.origin.y = frame.size.h - TEXT_HEIGHT;
     // If the text is HB, move up for the two lines
-    if (selectedFaction == 3) frame.origin.y -= 20;
+    if (selectedFaction == 3) frame.origin.y -= HB_TEXTHEIGHT;
     frame.size.h = TEXT_HEIGHT;
     sublayers[0] = text_layer_create(frame);
     frame.origin.y = LOGO_Y;
