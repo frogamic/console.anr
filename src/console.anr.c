@@ -50,7 +50,7 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 #else
     int clicks[] = {4, 3};
 #endif
-    gameWindow_init (faction_get_color(selectedFaction), faction_get_fg(selectedFaction), 4);
+    gameWindow_init (faction_get_color(selectedFaction), faction_get_fg(selectedFaction), clicks[selectedFaction]);
 }
 
 static void destroy_card(void* context) {
