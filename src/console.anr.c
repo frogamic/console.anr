@@ -45,7 +45,12 @@ static GColor faction_get_color(int faction) {
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-    gameWindow_init (faction_get_color(selectedFaction), 4);
+#ifdef PBL_COLOR
+    int clicks[] = {4, 4, 3, 3, 3, 4, 3};
+#else
+    int clicks[] = {4, 3};
+#endif
+    gameWindow_init (faction_get_color(selectedFaction), faction_get_fg(selectedFaction), 4);
 }
 
 static void destroy_card(void* context) {

@@ -51,7 +51,7 @@ static void window_unload(Window *window) {
     text_layer_destroy(text_layer);
 }
 
-void gameWindow_init(GColor bg, int clicks) {
+void gameWindow_init(GColor bg, GColor fg, int clicks) {
     window = window_create();
     window_set_click_config_provider(window, click_config_provider);
     window_set_window_handlers(window, (WindowHandlers) {
