@@ -31,7 +31,7 @@
                 "type": "font"
             },
             {
-                "characterRegex": "[-ABCDEHIJKLMNPRSTWY0-9]",
+                "characterRegex": "[-ABCDEHIJKLMNPRSTUWY0-9]",
                 "file": "fonts/CIND.ttf",
                 "name": "CIND_20",
                 "type": "font"
