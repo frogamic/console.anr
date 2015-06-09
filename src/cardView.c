@@ -30,24 +30,19 @@ static void animation_stop (Animation *animation, bool finished, void* context) 
     cv->layerNext = NULL;
     // If the animation is not finished, the new layer must be moved to the correct position.
     if (!finished) {
-        APP_LOG(APP_LOG_LEVEL_INFO, "Animation ending prematurely, repositioning layer %p", cv->layerCurrent);
         layer_set_frame(cv->layerCurrent, layer_get_frame(cv->layerParent));
     }
     animation_destroy((Animation*)animation);
-    APP_LOG(APP_LOG_LEVEL_INFO, "Animation %p destroyed", animation);
     cv->animation = NULL;
 }
 
 CardView* CardView_create(Window* w) {
     CardView* cv = malloc(sizeof(CardView));
     if (cv) {
-        APP_LOG(APP_LOG_LEVEL_INFO, "CardView %p created", cv);
         cv->layerParent = window_get_root_layer(w);
         cv->layerNext = NULL;
         cv->layerCurrent = NULL;
         cv->animation = NULL;
-    } else {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "Unable to create CardView with parent %p", w);
     }
     return cv;
 }
@@ -63,10 +58,8 @@ Layer* CardView_add_card(CardView* cv, Direction d, GColor bg, void (*destroyCal
 
     // Ensure the layer was created.
     if (!layer) {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "Unable to create new card for CardView %p", cv);
         return NULL;
     }
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Created new card %p", layer);
     
     // Get the pointer to the data to store the callback and context.
     Card* card = layer_get_data(layer);
@@ -79,12 +72,10 @@ Layer* CardView_add_card(CardView* cv, Direction d, GColor bg, void (*destroyCal
     // If there is still an animation running destroy it.
     if (cv->animation)
     {
-        APP_LOG(APP_LOG_LEVEL_INFO, "Animation %p already running, ending", cv->animation);
         animation_destroy((Animation*)cv->animation);
     }
     // Otherwise if the next layer hasn't begun moving onscreen destroy it.
     else if( cv->layerNext) {
-        APP_LOG(APP_LOG_LEVEL_INFO, "Layer %p found offscreen, removing", cv->layerNext);
         CardView_destroy_card(cv->layerNext);
     }
 
@@ -101,7 +92,6 @@ int CardView_animate(CardView* cv) {
     // Add the new layer as a child
     // If this is the first card then no animation is necessary, simply move next to current.
     if (!cv->layerCurrent) {
-        APP_LOG(APP_LOG_LEVEL_INFO, "First card %p added", cv->layerNext);
         cv->layerCurrent = cv->layerNext;
         cv->layerNext = NULL;
         // Set the new card's frame to window size.
@@ -110,21 +100,18 @@ int CardView_animate(CardView* cv) {
         layer_add_child(cv->layerParent, cv->layerCurrent);
     }
     else {
-        APP_LOG(APP_LOG_LEVEL_INFO, "Animating layer %p", cv->layerNext);
         layer_insert_below_sibling(cv->layerNext, cv->layerCurrent);
         cv->animation = property_animation_create_layer_frame(cv->layerNext, NULL, &target);
         animation_set_duration((Animation*)cv->animation, ANIMATION_DURATION);
         animation_set_handlers((Animation*)cv->animation, (AnimationHandlers) {
                 .stopped = (AnimationStoppedHandler) animation_stop }, cv);
         layer_add_child(cv->layerParent, cv->layerNext);
-        APP_LOG(APP_LOG_LEVEL_INFO, "Animation %p starting", cv->animation);
         animation_schedule((Animation*)cv->animation);
     }
     return 0;
 }
 
 void CardView_destroy_card(Layer* layer) {
-    APP_LOG(APP_LOG_LEVEL_INFO, "destroying layer %p", layer);
     Card* c = layer_get_data(layer);
     // Just in case there is no data
     if (!c) {
@@ -138,18 +125,14 @@ void CardView_destroy_card(Layer* layer) {
 }
 
 void CardView_destroy(CardView* cv) {
-    APP_LOG(APP_LOG_LEVEL_INFO, "destroying CardView %p", cv);
     if (cv->animation)
     {
-        APP_LOG(APP_LOG_LEVEL_INFO, "destroying animation %p", cv->animation);
         animation_destroy((Animation*)cv->animation);
     }
     if(cv->layerNext) {
-        APP_LOG(APP_LOG_LEVEL_INFO, "destroying next card %p", cv->layerNext);
         CardView_destroy_card(cv->layerNext);
     }
     if(cv->layerCurrent) {
-        APP_LOG(APP_LOG_LEVEL_INFO, "destroying current card %p", cv->layerCurrent);
         CardView_destroy_card(cv->layerCurrent);
     }
     free(cv);
