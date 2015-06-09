@@ -127,8 +127,10 @@ void CardView_destroy_card(Layer* layer) {
     APP_LOG(APP_LOG_LEVEL_INFO, "destroying layer %p", layer);
     Card* c = layer_get_data(layer);
     // Just in case there is no data
-    if (!c)
+    if (!c) {
+        layer_destroy(layer);
         return;
+    }
     // Call the destroy function passing it the context
     if (c->destroy)
         c->destroy(c->context);
@@ -139,12 +141,15 @@ void CardView_destroy(CardView* cv) {
     APP_LOG(APP_LOG_LEVEL_INFO, "destroying CardView %p", cv);
     if (cv->animation)
     {
+        APP_LOG(APP_LOG_LEVEL_INFO, "destroying animation %p", cv->animation);
         animation_destroy((Animation*)cv->animation);
     }
     if(cv->layerNext) {
+        APP_LOG(APP_LOG_LEVEL_INFO, "destroying next card %p", cv->layerNext);
         CardView_destroy_card(cv->layerNext);
     }
     if(cv->layerCurrent) {
+        APP_LOG(APP_LOG_LEVEL_INFO, "destroying current card %p", cv->layerCurrent);
         CardView_destroy_card(cv->layerCurrent);
     }
     free(cv);
