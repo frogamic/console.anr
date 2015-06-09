@@ -7,10 +7,9 @@
 #else
 #define FACTIONS 2
 #endif
-#define TEXT_Y 110
+#define LOGO_Y 25
+#define LOGO_HEIGHT 50
 #define TEXT_HEIGHT 50
-#define LOGO_Y 30
-#define LOGO_HEIGHT 55
 
 static Window *window;
 static CardView* cardView;
@@ -53,7 +52,6 @@ static void destroy_card(void* context) {
     TextLayer** layer = context;
     int i = 0;
     while (layer[i]) {
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "deleting sublayer %p", layer[i]);
         text_layer_destroy(layer[i]);
         ++i;
     }
@@ -73,13 +71,13 @@ static int make_card(CardView* cv, Direction d) {
     GRect frame = layer_get_frame(window_get_root_layer(window));
     // Create layers for text and logo.
     frame.origin.y = frame.size.h - TEXT_HEIGHT;
+    // If the text is HB, move up for the two lines
+    if (selectedFaction == 3) frame.origin.y -= 20;
     frame.size.h = TEXT_HEIGHT;
     sublayers[0] = text_layer_create(frame);
     frame.origin.y = LOGO_Y;
     frame.size.h = LOGO_HEIGHT;
     sublayers[1] = text_layer_create(frame);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Adding sublayer %p", sublayers[0]);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Adding sublayer %p", sublayers[1]);
     // Set both text layers to transparent and centered.
     text_layer_set_background_color(sublayers[0], GColorClear);
     text_layer_set_background_color(sublayers[1], GColorClear);
@@ -122,7 +120,7 @@ static void window_load(Window *window) {
 #ifdef PBL_PLATFORM_APLITE
     logofont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FACTION_LOGOS_30));
 #else
-    logofont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FACTION_LOGOS_47));
+    logofont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FACTION_LOGOS_46));
 #endif
     cyberfont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_CIND_20));
     cardView = CardView_create(window);

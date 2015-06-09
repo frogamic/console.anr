@@ -13,7 +13,7 @@
             {
                 "characterRegex": "[\ue005\ue602\ue605\ue607\ue60b\ue612\ue613]",
                 "file": "fonts/netrunner.ttf",
-                "name": "FACTION_LOGOS_47",
+                "name": "FACTION_LOGOS_46",
                 "type": "font",
                 "targetPlatforms": [ "basalt" ]
             },
