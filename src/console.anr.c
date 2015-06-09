@@ -54,7 +54,7 @@ static void destroy_card(void* context) {
 }
 
 static int make_card(CardView* cv, Direction d) {
-    const char* factionLogos[] = {"\ue605", "\ue612", "\ue005", "\ue602", "\ue60b", "\ue613", "\ue607"};
+    const char* factionLogos[] = {"\ue605", "\ue612", "\ue005", "\ue602", "\ue60b", "\ue603", "\ue607"};
     const char* factionNames[] = {"ANARCH", "CRIMINAL", "JINTEKI", "HAAS-\nBIOROID", "NBN", "SHAPER", "WEYLAND"};
     TextLayer** sublayers = malloc(sizeof(void*) * 3);
     Layer* layer = CardView_add_card(cv, d, faction_get_color(selectedFaction), destroy_card, sublayers);
