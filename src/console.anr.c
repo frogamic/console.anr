@@ -63,7 +63,7 @@ static int make_card(CardView* cv, Direction d) {
     const char* factionLogos[] = {"\ue605", "\ue612", "\ue005", "\ue602", "\ue60b", "\ue603", "\ue607"};
     const char* factionNames[] = {"ANARCH", "CRIMINAL", "JINTEKI", "HAAS-\nBIOROID", "NBN", "SHAPER", "WEYLAND"};
 #else
-    const char* factionLogos[] = {"\ue605\ue612\ue613", "\ue005\ue602\ue60b\ue607"};
+    const char* factionLogos[] = {"\ue605\ue612\ue603", "\ue005\ue602\ue60b\ue607"};
     const char* factionNames[] = {"RUNNER", "CORP"};
 #endif
     TextLayer** sublayers = malloc(sizeof(void*) * 3);
