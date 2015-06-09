@@ -66,6 +66,8 @@ static int make_card(CardView* cv, Direction d) {
     frame.origin.y = LOGO_Y;
     frame.size.h = LOGO_HEIGHT;
     sublayers[1] = text_layer_create(frame);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Adding sublayer %p", sublayers[0]);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Adding sublayer %p", sublayers[1]);
     // Set both text layers to transparent and centered.
     text_layer_set_background_color(sublayers[0], GColorClear);
     text_layer_set_background_color(sublayers[1], GColorClear);
