@@ -63,7 +63,7 @@ static int make_card(CardView* cv, Direction d) {
     const char* factionNames[] = {"ANARCH", "CRIMINAL", "JINTEKI", "HAAS-\nBIOROID", "NBN", "SHAPER", "WEYLAND"};
 #else
     const char* factionLogos[] = {"\ue605\ue612\ue613", "\ue005\ue602\ue60b\ue607"};
-    const char* factionNames[] = {"Runner", "Corporation"};
+    const char* factionNames[] = {"RUNNER", "CORP"};
 #endif
     TextLayer** sublayers = malloc(sizeof(void*) * 3);
     Layer* layer = CardView_add_card(cv, d, faction_get_color(selectedFaction), destroy_card, sublayers);
@@ -87,7 +87,11 @@ static int make_card(CardView* cv, Direction d) {
     text_layer_set_text_color(sublayers[1], faction_get_fg(selectedFaction));
     text_layer_set_font(sublayers[0], fonts_load_custom_font(resource_get_handle(RESOURCE_ID_CIND_20)));
     text_layer_set_overflow_mode(sublayers[0], GTextOverflowModeWordWrap);
+#ifdef PBL_PLATFORM_APLITE
+    text_layer_set_font(sublayers[1], fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FACTION_LOGOS_30)));
+#else
     text_layer_set_font(sublayers[1], fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FACTION_LOGOS_47)));
+#endif
     // Set name and logo in layers.
     text_layer_set_text(sublayers[0], factionNames[selectedFaction]);
     text_layer_set_text(sublayers[1], factionLogos[selectedFaction]);
