@@ -3,9 +3,9 @@
 #include "cardView.h"
 
 #ifdef PBL_COLOR
-#define FACTIONS 7
+#define FACTIONS 8
 #else
-#define FACTIONS 2
+#define FACTIONS 3
 #endif
 #define LOGO_Y 25
 #define LOGO_HEIGHT 50
@@ -25,6 +25,7 @@ static GColor faction_get_fg(int faction) {
         case 2: return GColorWhite;
         case 3: return GColorWhite;
         case 6: return GColorWhite;
+        case 7: return GColorWhite;
     };
 #endif
     return GColorBlack;
@@ -40,6 +41,7 @@ static GColor faction_get_color(int faction) {
         case 4: return GColorChromeYellow;
         case 5: return GColorKellyGreen;
         case 6: return GColorMidnightGreen;
+        case 7: return GColorDarkGray;
     };
 #endif
     return GColorWhite;
@@ -47,9 +49,9 @@ static GColor faction_get_color(int faction) {
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 #ifdef PBL_COLOR
-    int clicks[] = {4, 4, 3, 3, 3, 4, 3};
+    int clicks[] = {4, 4, 3, 3, 3, 4, 3, 0};
 #else
-    int clicks[] = {4, 3};
+    int clicks[] = {4, 3, 0};
 #endif
     gameWindow_init (faction_get_color(selectedFaction), faction_get_fg(selectedFaction), clicks[selectedFaction]);
 }
@@ -66,8 +68,8 @@ static void destroy_card(void* context) {
 
 static int make_card(CardView* cv, Direction d) {
 #ifdef PBL_COLOR
-    const char* factionLogos[] = {"\ue605", "\ue612", "\ue005", "\ue602", "\ue60b", "\ue613", "\ue607"};
-    const char* factionNames[] = {"ANARCH", "CRIMINAL", "JINTEKI", "HAAS-\nBIOROID", "NBN", "SHAPER", "WEYLAND"};
+    const char* factionLogos[] = {"\ue605", "\ue612", "\ue005", "\ue602", "\ue60b", "\ue613", "\ue607", "\ue611\ue600"};
+    const char* factionNames[] = {"ANARCH", "CRIMINAL", "JINTEKI", "HAAS-\nBIOROID", "NBN", "SHAPER", "WEYLAND", "TUTORIAL"};
 #else
     const char* factionLogos[] = {"\ue605\ue612\ue613", "\ue005\ue602\ue60b\ue607"};
     const char* factionNames[] = {"RUNNER", "CORP"};
