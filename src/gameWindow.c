@@ -10,16 +10,16 @@
 #define LONG_CLICK_DURATION 700
 #define SELECTION_BOX_HEIGHT 30
 #define VALUETEXT_LEFT_OFFSET 40
-#define VALUETEXT_TOP_OFFSET 40
+#define VALUETEXT_TOP_OFFSET 2
 enum {VALUE_CLICKS = 0, VALUE_CREDS = 1, VALUE_CREDS_RECUR = 2};
 
 static Window *window;
-static TextLayer *text_layer;
 static GColor s_fg, s_bg;
 static int value[2][3] = {{0, 0, 0}, {0, 5, 0}};
 static int selectedValue;
 static int s_clicks;
-static TextLayer* valueText[3];
+static TextLayer* valueLayer[3];
+static char valueText[3][TEXT_LEN] = {{'\0'}};
 static GRect selectionBox[3];
 
 static void change_value(bool total, int amount) {
@@ -37,14 +37,13 @@ static void change_value(bool total, int amount) {
                 value[0][selectedValue] = value[1][selectedValue];
         }
     }
-    char displayText[TEXT_LEN] = {'\0'};
     if (selectedValue == VALUE_CLICKS) {
-        snprintf(displayText, TEXT_LEN, "%d of %d", value[0][selectedValue], value[0][selectedValue]);
+        snprintf(valueText[selectedValue], TEXT_LEN, "%d of %d", value[0][selectedValue], value[1][selectedValue]);
     }
     else {
-        snprintf(displayText, TEXT_LEN, "%d", value[0][selectedValue]);
+        snprintf(valueText[selectedValue], TEXT_LEN, "%d", value[0][selectedValue]);
     }
-    text_layer_set_text(valueText[selectedValue], displayText);
+    text_layer_set_text(valueLayer[selectedValue], valueText[selectedValue]);
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -85,6 +84,7 @@ static void click_config_provider(void *context) {
 }
 
 static void window_load(Window *window) {
+    app_log(APP_LOG_LEVEL_DEBUG, "fuckwit.c", 0, "window loading");
     window_set_background_color(window, s_bg);
 
     // Compute locations of selection boxes and textlayers.
@@ -103,9 +103,13 @@ static void window_load(Window *window) {
         textframe.size.w -= VALUETEXT_LEFT_OFFSET;
         textframe.origin.y += VALUETEXT_TOP_OFFSET;
         textframe.size.h -= VALUETEXT_TOP_OFFSET;
-        valueText[i] = text_layer_create(textframe);
-        text_layer_set_text_color(valueText[i], s_fg);
-        layer_add_child(window_get_root_layer(window), text_layer_get_layer(valueText[i]));
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "%d text layer at (%d,%d)", i, textframe.origin.x, textframe.origin.y);
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "       size %dx%d", textframe.size.w, textframe.size.h);
+        valueLayer[i] = text_layer_create(textframe);
+        text_layer_set_text_color(valueLayer[i], s_fg);
+        text_layer_set_background_color(valueLayer[i], GColorClear);
+        text_layer_set_text(valueLayer[i],"error");
+        layer_add_child(window_get_root_layer(window), text_layer_get_layer(valueLayer[i]));
     };
 
     // Get number of clicks to start with
@@ -114,7 +118,6 @@ static void window_load(Window *window) {
 }
 
 static void window_unload(Window *window) {
-    text_layer_destroy(text_layer);
 }
 
 void gameWindow_init(GColor bg, GColor fg, int clicks) {
