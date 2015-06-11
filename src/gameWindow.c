@@ -117,12 +117,11 @@ void gameWindow_init(GColor bg, GColor fg, int clicks) {
 
     for (int i = 0; i< VALUES; i++)
     {
-        selectionBox[i] = (GRect) {
-            .origin.x = 0,
-            .origin.y = padding + (padding + SELECTION_BOX_HEIGHT) * i,
-            .size.w = layer_get_frame(window_get_root_layer(window)).size.w,
-            .size.h = SELECTION_BOX_HEIGHT
-        };
+        selectionBox[i].origin.x = 0;
+        selectionBox[i].origin.y = padding + (padding + SELECTION_BOX_HEIGHT) * i;
+        selectionBox[i].size.w = layer_get_frame(window_get_root_layer(window)).size.w;
+        selectionBox[i].size.h = SELECTION_BOX_HEIGHT;
+
         GRect textframe = selectionBox[i];
         textframe.origin.x += VALUETEXT_LEFT_OFFSET;
         textframe.size.w -= VALUETEXT_LEFT_OFFSET;
