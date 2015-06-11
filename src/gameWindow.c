@@ -70,7 +70,6 @@ static void back_click_handler(ClickRecognizerRef recognizer, void *context) {
     static bool pressed = false;
     if (pressed) window_stack_pop(true);
     else {
-        text_layer_set_text(text_layer, "press again");
         pressed = true;
     }
 }
@@ -86,13 +85,6 @@ static void click_config_provider(void *context) {
 
 static void window_load(Window *window) {
     window_set_background_color(window, s_bg);
-    Layer *window_layer = window_get_root_layer(window);
-    GRect bounds = layer_get_bounds(window_layer);
-
-    text_layer = text_layer_create((GRect) { .origin = { 0, 72 }, .size = { bounds.size.w, 20 } });
-    text_layer_set_text(text_layer, "Press a button");
-    text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
-    layer_add_child(window_layer, text_layer_get_layer(text_layer));
 }
 
 static void window_unload(Window *window) {
@@ -128,6 +120,7 @@ void gameWindow_init(GColor bg, GColor fg, int clicks) {
         textframe.origin.y += VALUETEXT_TOP_OFFSET;
         textframe.size.h -= VALUETEXT_TOP_OFFSET;
         valueText[i] = text_layer_create(textframe);
+        layer_add_child(window_get_root_layer(window), text_layer_get_layer(valueText[i]));
     };
 
     // Get number of clicks to start with
