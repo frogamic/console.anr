@@ -8,14 +8,18 @@
 #define TEXT_LEN 9
 #define VALUES 3
 #define LONG_CLICK_DURATION 700
+#define SELECTION_BOX_HEIGHT 30
+#define VALUETEXT_LEFT_OFFSET 40
+#define VALUETEXT_TOP_OFFSET 40
 enum {VALUE_CLICKS = 0, VALUE_CREDS = 1, VALUE_CREDS_RECUR = 2};
 
 static Window *window;
 static TextLayer *text_layer;
 static GColor s_fg, s_bg;
 static int value[2][3] = {{0, 0, 0}, {0, 5, 0}};
-static int selectedValue = 0;
+static int selectedValue;
 static TextLayer* valueText[3];
+static GRect selectionBox[3];
 
 static void change_value(bool total, int amount) {
     value[0][selectedValue] += amount;
@@ -103,8 +107,34 @@ void gameWindow_init(GColor bg, GColor fg, int clicks) {
         .unload = window_unload,
     });
 
+    // Get colors.
     s_fg = fg;
     s_bg = bg;
+
+    // Compute locations of selection boxes and textlayers.
+    int screenheight = layer_get_frame(window_get_root_layer(window)).size.h;
+    int padding = (screenheight - (VALUES * SELECTION_BOX_HEIGHT)) / (VALUES + 1);
+
+    for (int i = 0; i< VALUES; i++)
+    {
+        selectionBox[i] = (GRect) {
+            .origin.x = 0,
+            .origin.y = padding + (padding + SELECTION_BOX_HEIGHT) * i,
+            .size.w = layer_get_frame(window_get_root_layer(window)).size.w,
+            .size.h = SELECTION_BOX_HEIGHT
+        };
+        GRect textframe = selectionBox[i];
+        textframe.origin.x += VALUETEXT_LEFT_OFFSET;
+        textframe.size.w -= VALUETEXT_LEFT_OFFSET;
+        textframe.origin.y += VALUETEXT_TOP_OFFSET;
+        textframe.size.h -= VALUETEXT_TOP_OFFSET;
+        valueText[i] = text_layer_create(textframe);
+    };
+
+    // Get number of clicks to start with
+    selectedValue = 0;
+    change_value(true, clicks);
+
     window_stack_push(window, true);
 }
 
