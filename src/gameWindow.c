@@ -18,6 +18,7 @@ static TextLayer *text_layer;
 static GColor s_fg, s_bg;
 static int value[2][3] = {{0, 0, 0}, {0, 5, 0}};
 static int selectedValue;
+static int s_clicks;
 static TextLayer* valueText[3];
 static GRect selectionBox[3];
 
@@ -85,23 +86,6 @@ static void click_config_provider(void *context) {
 
 static void window_load(Window *window) {
     window_set_background_color(window, s_bg);
-}
-
-static void window_unload(Window *window) {
-    text_layer_destroy(text_layer);
-}
-
-void gameWindow_init(GColor bg, GColor fg, int clicks) {
-    window = window_create();
-    window_set_click_config_provider(window, click_config_provider);
-    window_set_window_handlers(window, (WindowHandlers) {
-        .load = window_load,
-        .unload = window_unload,
-    });
-
-    // Get colors.
-    s_fg = fg;
-    s_bg = bg;
 
     // Compute locations of selection boxes and textlayers.
     int screenheight = layer_get_frame(window_get_root_layer(window)).size.h;
@@ -120,12 +104,31 @@ void gameWindow_init(GColor bg, GColor fg, int clicks) {
         textframe.origin.y += VALUETEXT_TOP_OFFSET;
         textframe.size.h -= VALUETEXT_TOP_OFFSET;
         valueText[i] = text_layer_create(textframe);
+        text_layer_set_text_color(valueText[i], s_fg);
         layer_add_child(window_get_root_layer(window), text_layer_get_layer(valueText[i]));
     };
 
     // Get number of clicks to start with
     selectedValue = 0;
-    change_value(true, clicks);
+    change_value(true, s_clicks);
+}
+
+static void window_unload(Window *window) {
+    text_layer_destroy(text_layer);
+}
+
+void gameWindow_init(GColor bg, GColor fg, int clicks) {
+    window = window_create();
+    window_set_click_config_provider(window, click_config_provider);
+    window_set_window_handlers(window, (WindowHandlers) {
+        .load = window_load,
+        .unload = window_unload,
+    });
+
+    // Get colors.
+    s_fg = fg;
+    s_bg = bg;
+    s_clicks = clicks;
 
     window_stack_push(window, true);
 }
