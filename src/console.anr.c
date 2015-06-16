@@ -8,10 +8,15 @@
 #define FACTIONS 3
 #endif
 #define LOGO_Y 25
-#define LOGO_HEIGHT 50
+#define LOGO_HEIGHT 100
 #define TEXT_HEIGHT 50
 #define HB_TEXTHEIGHT 20
 
+#ifdef PBL_COLOR
+enum {ANARCH, CRIMINAL, JINTEKI, HAAS, NBN, SHAPER, WEYLAND, TUTORIAL};
+#else
+enum {CORP, RUNNER, TUTORIAL};
+#endif
 static Window *window;
 static CardView* cardView;
 static int selectedFaction = 0;
@@ -71,20 +76,29 @@ static int make_card(CardView* cv, Direction d) {
     const char* factionLogos[] = {"\ue605", "\ue612", "\ue005", "\ue602", "\ue60b", "\ue613", "\ue607", "\ue611\ue600"};
     const char* factionNames[] = {"ANARCH", "CRIMINAL", "JINTEKI", "HAAS-\nBIOROID", "NBN", "SHAPER", "WEYLAND", "TUTORIAL"};
 #else
-    const char* factionLogos[] = {"\ue605\ue612\ue613", "\ue005\ue602\ue60b\ue607"};
-    const char* factionNames[] = {"RUNNER", "CORP"};
+    const char* factionLogos[] = {"\ue005\ue602\n\ue60b\ue607", "\ue605\ue612\ue613", "\ue611\ue600"};
+    const char* factionNames[] = {"CORP", "RUNNER", "TUTORIAL"};
 #endif
     TextLayer** sublayers = malloc(sizeof(void*) * 3);
     Layer* layer = CardView_add_card(cv, d, faction_get_color(selectedFaction), destroy_card, sublayers);
     GRect frame = layer_get_frame(window_get_root_layer(window));
     // Create layers for text and logo.
     frame.origin.y = frame.size.h - TEXT_HEIGHT;
-    // If the text is HB, move up for the two lines
-    if (selectedFaction == 3) frame.origin.y -= HB_TEXTHEIGHT;
     frame.size.h = TEXT_HEIGHT;
+#ifdef PBL_COLOR
+    // If the text is HB, move up for the two lines
+    if (selectedFaction == HAAS) frame.origin.y -= HB_TEXTHEIGHT;
+#else
+    // If the corp is selected move the text down to make room for the logos.
+    if (selectedFaction == CORP) frame.origin.y += LOGO_Y / 2;
+#endif
     sublayers[0] = text_layer_create(frame);
     frame.origin.y = LOGO_Y;
     frame.size.h = LOGO_HEIGHT;
+#ifndef PBL_COLOR
+    // If the corp is selected move the logos up to make room for both lines.
+    if (selectedFaction == CORP) frame.origin.y-= LOGO_Y / 2;
+#endif
     sublayers[1] = text_layer_create(frame);
     // Set both text layers to transparent and centered.
     text_layer_set_background_color(sublayers[0], GColorClear);
@@ -125,11 +139,11 @@ static void click_config_provider(void *context) {
 }
 
 static void window_load(Window *window) {
-#ifdef PBL_PLATFORM_APLITE
-    logofont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FACTION_LOGOS_30));
-#else
+// #ifdef PBL_PLATFORM_APLITE
+    // logofont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FACTION_LOGOS_30));
+// #else
     logofont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FACTION_LOGOS_46));
-#endif
+// #endif
     cyberfont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_CIND_20));
     cardView = CardView_create(window);
     make_card(cardView, FROM_ABOVE);
