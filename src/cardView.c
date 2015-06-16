@@ -5,7 +5,7 @@
 
 #include "cardView.h"
 
-#define ANIMATION_DURATION 500
+#define ANIMATION_DURATION 250
 #define ABOVE_SCREEN -144
 #define BELOW_SCREEN 144
 
