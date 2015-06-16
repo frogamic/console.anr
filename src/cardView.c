@@ -32,7 +32,11 @@ static void animation_stop (Animation *animation, bool finished, void* context) 
     if (!finished) {
         layer_set_frame(cv->layerCurrent, layer_get_frame(cv->layerParent));
     }
-    animation_destroy((Animation*)animation);
+    // Destroy the animation only if it finished naturally on aplite
+#ifdef PBL_PLATFORM_APLITE
+    if (finished)
+        animation_destroy((Animation*)animation);
+#endif
     cv->animation = NULL;
 }
 
@@ -120,7 +124,9 @@ void CardView_destroy_card(Layer* layer) {
     }
     // Call the destroy function passing it the context
     if (c->destroy)
+    {
         c->destroy(c->context);
+    }
     layer_destroy(layer);
 }
 
