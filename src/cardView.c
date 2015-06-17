@@ -6,8 +6,6 @@
 #include "cardView.h"
 
 #define ANIMATION_DURATION 250
-#define ABOVE_SCREEN -144
-#define BELOW_SCREEN 144
 
 typedef struct {
     void (*destroy)(void*);
@@ -53,8 +51,8 @@ CardView* CardView_create(Window* w) {
 
 Layer* CardView_add_card(CardView* cv, Direction d, GColor bg, void (*destroyCallback)(void*), void* context) {
     // y positions for above and below the screen.
-    const int ypos[] = {ABOVE_SCREEN, BELOW_SCREEN};
     GRect cardFrame = layer_get_frame(cv->layerParent);
+    const int ypos[] = {0 - cardFrame.size.h, cardFrame.size.h};
     // Put the frame offscreen in the specified direction.
     cardFrame.origin.y = ypos[d];
     // Create the new layer with extra data for pointer to the context.
