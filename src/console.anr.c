@@ -26,12 +26,16 @@ static GFont cyberfont;
 static GColor faction_get_fg(int faction) {
 #ifdef PBL_COLOR
     switch (faction) {
-        case 1: return GColorWhite;
-        case 2: return GColorWhite;
-        case 3: return GColorWhite;
-        case 6: return GColorWhite;
-        case 7: return GColorWhite;
+        case CRIMINAL: return GColorWhite;
+        case JINTEKI: return GColorWhite;
+        case HAAS: return GColorWhite;
+        case WEYLAND: return GColorWhite;
+        case TUTORIAL: return GColorWhite;
     };
+#else
+    switch (faction) {
+        case RUNNER: return GColorWhite;
+    }
 #endif
     return GColorBlack;
 }
@@ -39,15 +43,19 @@ static GColor faction_get_fg(int faction) {
 static GColor faction_get_color(int faction) {
 #ifdef PBL_COLOR
     switch (faction) {
-        case 0: return GColorRed;
-        case 1: return GColorBlue;
-        case 2: return GColorDarkCandyAppleRed;
-        case 3: return GColorImperialPurple;
-        case 4: return GColorChromeYellow;
-        case 5: return GColorKellyGreen;
-        case 6: return GColorMidnightGreen;
-        case 7: return GColorDarkGray;
+        case ANARCH: return GColorRed;
+        case CRIMINAL: return GColorBlue;
+        case JINTEKI: return GColorDarkCandyAppleRed;
+        case HAAS: return GColorImperialPurple;
+        case NBN: return GColorChromeYellow;
+        case SHAPER: return GColorKellyGreen;
+        case WEYLAND: return GColorMidnightGreen;
+        case TUTORIAL: return GColorDarkGray;
     };
+#else
+    switch (faction) {
+        case RUNNER: return GColorBlack;
+    }
 #endif
     return GColorWhite;
 }
