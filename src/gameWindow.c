@@ -23,8 +23,10 @@ enum {VALUE_CLICKS = 0, VALUE_CREDS = 1, VALUE_CREDS_RECUR = 2};
 static Layer* layerGraphics, * layerSelection;
 static Window *window;
 static GColor s_fg, s_bg;
-static int avClicks, totalClicks, credits;
-static int selectedValue;
+static int avClicks, totalClicks;
+static int credits = 5;
+static int turns = 1;
+static int selectedValue = 0;
 static GFont font_cind_small, font_cind_large, font_symbols;
 static char creditText[TEXT_LEN] = "123";
 static char turnText[TEXT_LEN] = "TURN 6";
@@ -36,10 +38,10 @@ static GRect selectionFrame[] = {
         .size.h = 30,
     },
     (GRect){
-        .origin.x = 2,
+        .origin.x = 1,
         .origin.y = 58,
         .size.w = SCREENWIDTH - 2,
-        .size.h = 43,
+        .size.h = 42,
     },
 };
 
@@ -145,7 +147,7 @@ static void window_load(Window *window) {
 
     // Add the graphics and selection layers
     layerGraphics = layer_create(layer_get_frame(window_get_root_layer(window)));
-    layerSelection = layer_create(selectionFrame[0]);
+    layerSelection = layer_create(selectionFrame[1]);
     layer_set_update_proc(layerGraphics, main_update_proc);
     layer_set_update_proc(layerSelection, selection_update_proc);
     layer_add_child(window_get_root_layer(window), layerGraphics);
