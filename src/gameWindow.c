@@ -16,7 +16,8 @@
 #define CREDITS_SYMBOL_OFFSET 6
 #define SCREENWIDTH 144
 #define TURNRECT (GRect){.size.w=SCREENWIDTH, .size.h=30, .origin.x=0, .origin.y=112}
-#define SELECTION_ROUNDING 6
+#define SELECT_ROUNDING 6
+#define SELECT_ANIMATION_DURATION 250
 #define CREDSYM "\ue600"
 enum {VALUE_CLICKS = 0, VALUE_CREDS = 1, VALUE_CREDS_RECUR = 2};
 
@@ -90,8 +91,9 @@ static void draw_credit_text(GContext* ctx, const char* credits, int y) {
 
 static void selection_update_proc(Layer* layer, GContext* ctx) {
     graphics_context_set_stroke_color(ctx, s_fg);
-    GRect rect = layer_get_bounds(layer);
-    graphics_draw_round_rect(ctx, rect, SELECTION_ROUNDING);
+    GRect rect = layer_get_frame(layer);
+    rect.origin = (GPoint){.x = 0, .y = 0};
+    graphics_draw_round_rect(ctx, rect, SELECT_ROUNDING);
 }
 
 static void main_update_proc(Layer* layer, GContext* ctx) {
@@ -104,8 +106,29 @@ static void main_update_proc(Layer* layer, GContext* ctx) {
             GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 }
 
+static void select_animation_stopped(Animation* animation, bool finished, void* context) {
+#ifdef PBL_PLATFORM_APLITE
+    if (finished) {
+        animation_destroy(animation);
+    }
+#endif
+    PropertyAnimation** pa = context;
+    *pa = NULL;
+}
+
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
     selectedValue = (selectedValue + 1) % VALUES;
+    static PropertyAnimation* animation = NULL;
+   
+    if (animation != NULL)
+       animation_destroy((Animation*)animation);
+    animation = property_animation_create_layer_frame(layerSelection, NULL,
+            &selectionFrame[selectedValue]);
+    animation_set_curve((Animation*) animation, AnimationCurveEaseOut);
+    animation_set_duration((Animation*) animation, SELECT_ANIMATION_DURATION);
+    animation_set_handlers((Animation*) animation, (AnimationHandlers){
+            .stopped = select_animation_stopped}, &animation);
+    animation_schedule((Animation*) animation);
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -147,7 +170,7 @@ static void window_load(Window *window) {
 
     // Add the graphics and selection layers
     layerGraphics = layer_create(layer_get_frame(window_get_root_layer(window)));
-    layerSelection = layer_create(selectionFrame[1]);
+    layerSelection = layer_create(selectionFrame[0]);
     layer_set_update_proc(layerGraphics, main_update_proc);
     layer_set_update_proc(layerSelection, selection_update_proc);
     layer_add_child(window_get_root_layer(window), layerGraphics);
