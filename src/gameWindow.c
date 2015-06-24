@@ -7,16 +7,18 @@
 
 #define TEXT_LEN 9
 #define VALUES 2
-#define LONG_CLICK_DURATION 700
-#define MAX_CLICKS 7
+#define LONG_CLICK_DURATION 500
+#define MAX_CLICKS 6
 #define CLICKS_Y 19
 #define CLICKS_RADIUS 10
 #define CLICKS_THICKNESS 3
 #define CLICKS_FILL_RADIUS 5
+#define CLICKS_SIZE ((CLICKS_RADIUS * 2) + 4)
+#define CLICKS_X_OFFSET 1
 #define CREDITS_Y 49
 #define CREDITS_SYMBOL_OFFSET 6
-#define SCREENWIDTH 144
-#define TURNRECT (GRect){.size.w=SCREENWIDTH, .size.h=30, .origin.x=0, .origin.y=112}
+#define SCREEN_WIDTH 144
+#define TURNRECT (GRect){.size.w=SCREEN_WIDTH, .size.h=30, .origin.x=0, .origin.y=112}
 #define SELECT_ROUNDING 6
 #define SELECT_ANIMATION_DURATION 250
 #define CREDSYM "\ue600"
@@ -30,19 +32,19 @@ static int credits = 5;
 static int turns = 1;
 static int selectedValue = 0;
 static GFont font_cind_small, font_cind_large, font_symbols;
-static char creditText[TEXT_LEN] = "1";
+static char creditText[TEXT_LEN] = "5";
 static char turnText[TEXT_LEN] = "TURN 1";
 static GRect selectionFrame[] = {
     (GRect){
         .origin.x = 1,
         .origin.y = 14,
-        .size.w = SCREENWIDTH - 2,
+        .size.w = SCREEN_WIDTH - 2,
         .size.h = 30,
     },
     (GRect){
         .origin.x = 1,
         .origin.y = 58,
-        .size.w = SCREENWIDTH - 2,
+        .size.w = SCREEN_WIDTH - 2,
         .size.h = 42,
     },
 };
@@ -70,16 +72,16 @@ static void draw_click(GContext* ctx, bool filled, bool perm, int y, int x) {
 static void draw_credit_text(GContext* ctx, const char* credits, int y) {
     GRect credFrame, symFrame;
     credFrame.size = graphics_text_layout_get_content_size(
-        credits, font_cind_large, (GRect){.size.w = SCREENWIDTH, .size.h = 50},
+        credits, font_cind_large, (GRect){.size.w = SCREEN_WIDTH, .size.h = 50},
         GTextOverflowModeFill, GTextAlignmentLeft);
     symFrame.size = graphics_text_layout_get_content_size(
-        CREDSYM, font_symbols, (GRect){.size.w = SCREENWIDTH, .size.h = 50},
+        CREDSYM, font_symbols, (GRect){.size.w = SCREEN_WIDTH, .size.h = 50},
         GTextOverflowModeFill, GTextAlignmentLeft);
     int credwidth = credFrame.size.w;
     int symwidth = symFrame.size.w;
     int halfwidth = (symwidth + credwidth) / 2;
-    credFrame.origin.x = (SCREENWIDTH / 2) - halfwidth;
-    symFrame.origin.x = (SCREENWIDTH / 2) + (halfwidth - symwidth);
+    credFrame.origin.x = (SCREEN_WIDTH / 2) - halfwidth;
+    symFrame.origin.x = (SCREEN_WIDTH / 2) + (halfwidth - symwidth);
     symFrame.origin.y = y + CREDITS_SYMBOL_OFFSET;
     credFrame.origin.y = y;
     graphics_context_set_text_color(ctx, s_fg);
@@ -98,9 +100,12 @@ static void selection_update_proc(Layer* layer, GContext* ctx) {
 }
 
 static void main_update_proc(Layer* layer, GContext* ctx) {
-    draw_click(ctx, true, true, CLICKS_Y, 38);
-    draw_click(ctx, true, true, CLICKS_Y, 62);
-    draw_click(ctx, true, true, CLICKS_Y, 86);
+    int t = (avClicks < totalClicks) ? totalClicks : avClicks;
+    int x = (SCREEN_WIDTH - t * CLICKS_SIZE) / 2 + CLICKS_X_OFFSET;
+    for (int i = 0; i < t; i++) {
+        draw_click(ctx, avClicks > i, totalClicks > i, CLICKS_Y, x);
+        x += CLICKS_SIZE;
+    }
     draw_credit_text(ctx, creditText, CREDITS_Y);
     graphics_context_set_text_color(ctx, s_fg);
     graphics_draw_text(ctx, turnText, font_cind_small, TURNRECT,
@@ -141,7 +146,7 @@ static void new_turn(void) {
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
     if (selectedValue == VALUE_CLICKS) {
         avClicks++;
-        avClicks %= MAX_CLICKS;
+        avClicks = (avClicks < MAX_CLICKS) ? avClicks : MAX_CLICKS;
     }
     else if (selectedValue == VALUE_CREDITS) {
         credits++;
@@ -168,16 +173,22 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
 
 static void up_long_handler(ClickRecognizerRef recognizer, void *context) {
     if (selectedValue == VALUE_CLICKS) {
-        totalClicks--;
+        totalClicks++;
     }
-    layer_mark_dirty(layerGraphics);
+    else if (selectedValue == VALUE_CREDITS) {
+        credits += 4;
+    }
+    up_click_handler(recognizer, context);
 }
 
 static void down_long_handler(ClickRecognizerRef recognizer, void *context) {
     if (selectedValue == VALUE_CLICKS) {
         totalClicks--;
     }
-    layer_mark_dirty(layerGraphics);
+    else if (selectedValue == VALUE_CREDITS) {
+        credits -= 4;
+    }
+    down_click_handler(recognizer, context);
 }
 
 static void back_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -224,7 +235,8 @@ static void window_unload(Window *window) {
 
 void gameWindow_init(GColor bg, GColor fg, int clicks) {
     window = window_create();
-    window_set_click_config_provider(window, click_config_provider);
+    if (clicks != 0)
+        window_set_click_config_provider(window, click_config_provider);
     window_set_window_handlers(window, (WindowHandlers) {
         .load = window_load,
         .unload = window_unload,
