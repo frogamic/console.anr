@@ -64,7 +64,7 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 #ifdef PBL_COLOR
     int clicks[] = {4, 4, 3, 3, 3, 4, 3, 0};
 #else
-    int clicks[] = {4, 3, 0};
+    int clicks[] = {3, 4, 0};
 #endif
     gameWindow_init (faction_get_color(selectedFaction), faction_get_fg(selectedFaction), clicks[selectedFaction]);
 }
