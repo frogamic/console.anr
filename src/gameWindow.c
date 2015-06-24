@@ -6,44 +6,100 @@
 #include "gameWindow.h"
 
 #define TEXT_LEN 9
-#define VALUES 3
+#define VALUES 2
 #define LONG_CLICK_DURATION 700
-#define SELECTION_BOX_HEIGHT 30
-#define VALUETEXT_LEFT_OFFSET 40
-#define VALUETEXT_TOP_OFFSET 2
+#define CLICKS_Y 19
+#define CLICKS_RADIUS 10
+#define CLICKS_THICKNESS 3
+#define CLICKS_FILL_RADIUS 5
+#define CREDITS_Y 49
+#define CREDITS_SYMBOL_OFFSET 6
+#define SCREENWIDTH 144
+#define TURNRECT (GRect){.size.w=SCREENWIDTH, .size.h=30, .origin.x=0, .origin.y=112}
+#define SELECTION_ROUNDING 6
+#define CREDSYM "\ue600"
 enum {VALUE_CLICKS = 0, VALUE_CREDS = 1, VALUE_CREDS_RECUR = 2};
 
+static Layer* layerGraphics, * layerSelection;
 static Window *window;
 static GColor s_fg, s_bg;
-static int value[2][3] = {{0, 0, 0}, {0, 5, 0}};
+static int avClicks, totalClicks, credits;
 static int selectedValue;
-static int s_clicks;
-static TextLayer* valueLayer[3];
-static char valueText[3][TEXT_LEN] = {{'\0'}};
-static GRect selectionBox[3];
+static GFont font_cind_small, font_cind_large, font_symbols;
+static char creditText[TEXT_LEN] = "123";
+static char turnText[TEXT_LEN] = "TURN 6";
+static GRect selectionFrame[] = {
+    (GRect){
+        .origin.x = 1,
+        .origin.y = 14,
+        .size.w = SCREENWIDTH - 2,
+        .size.h = 30,
+    },
+    (GRect){
+        .origin.x = 2,
+        .origin.y = 58,
+        .size.w = SCREENWIDTH - 2,
+        .size.h = 43,
+    },
+};
 
-static void change_value(bool total, int amount) {
-    value[0][selectedValue] += amount;
-    // values can't go below 0.
-    if (value[0][selectedValue] < 0) value[0][selectedValue] = 0;
-    // Change the total value if applicable.
-    if (total && selectedValue != VALUE_CREDS) {
-        value[1][selectedValue] += amount;
-        // Total values can't go below 0 either.
-        if (value[1][selectedValue] < 0) value[1][selectedValue] = 0;
-        // If the value goes above the total, do something.
-        if (value[0][selectedValue] > value[1][selectedValue]) {
-            if (selectedValue == VALUE_CREDS_RECUR)
-                value[0][selectedValue] = value[1][selectedValue];
-        }
+static void draw_click(GContext* ctx, bool filled, bool perm, int y, int x) {
+    GPoint p = {.x = x + CLICKS_RADIUS, .y = y + CLICKS_RADIUS};
+    if (perm) {
+#ifdef PBL_PLATFORM_APLITE
+        graphics_context_set_fill_color(ctx, s_fg);
+        graphics_fill_circle(ctx, p, CLICKS_RADIUS);
+        graphics_context_set_fill_color(ctx, s_bg);
+        graphics_fill_circle(ctx, p, CLICKS_RADIUS - CLICKS_THICKNESS);
+#else
+        graphics_context_set_stroke_color(ctx, s_fg);
+        graphics_context_set_stroke_width(ctx, CLICKS_THICKNESS);
+        graphics_draw_circle(ctx, p, CLICKS_RADIUS - (CLICKS_THICKNESS / 2));
+#endif
     }
-    if (selectedValue == VALUE_CLICKS) {
-        snprintf(valueText[selectedValue], TEXT_LEN, "%d of %d", value[0][selectedValue], value[1][selectedValue]);
+    if (filled) {
+        graphics_context_set_fill_color(ctx, s_fg);
+        graphics_fill_circle(ctx, p, CLICKS_FILL_RADIUS);
     }
-    else {
-        snprintf(valueText[selectedValue], TEXT_LEN, "%d", value[0][selectedValue]);
-    }
-    text_layer_set_text(valueLayer[selectedValue], valueText[selectedValue]);
+}
+
+static void draw_credit_text(GContext* ctx, const char* credits, int y) {
+    GRect credFrame, symFrame;
+    credFrame.size = graphics_text_layout_get_content_size(
+        credits, font_cind_large, (GRect){.size.w = SCREENWIDTH, .size.h = 50},
+        GTextOverflowModeFill, GTextAlignmentLeft);
+    symFrame.size = graphics_text_layout_get_content_size(
+        CREDSYM, font_symbols, (GRect){.size.w = SCREENWIDTH, .size.h = 50},
+        GTextOverflowModeFill, GTextAlignmentLeft);
+    int credwidth = credFrame.size.w;
+    int symwidth = symFrame.size.w;
+    int halfwidth = (symwidth + credwidth) / 2;
+    credFrame.origin.x = (SCREENWIDTH / 2) - halfwidth;
+    symFrame.origin.x = (SCREENWIDTH / 2) + (halfwidth - symwidth);
+    symFrame.origin.y = y + CREDITS_SYMBOL_OFFSET;
+    credFrame.origin.y = y;
+    graphics_context_set_text_color(ctx, s_fg);
+    graphics_context_set_fill_color(ctx, GColorClear);
+    graphics_draw_text(ctx, credits, font_cind_large, credFrame,
+            GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+    graphics_draw_text(ctx, CREDSYM, font_symbols, symFrame,
+            GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+}
+
+static void selection_update_proc(Layer* layer, GContext* ctx) {
+    graphics_context_set_stroke_color(ctx, s_fg);
+    GRect rect = layer_get_bounds(layer);
+    graphics_draw_round_rect(ctx, rect, SELECTION_ROUNDING);
+}
+
+static void main_update_proc(Layer* layer, GContext* ctx) {
+    draw_click(ctx, true, true, CLICKS_Y, 38);
+    draw_click(ctx, true, true, CLICKS_Y, 62);
+    draw_click(ctx, true, true, CLICKS_Y, 86);
+    draw_credit_text(ctx, creditText, CREDITS_Y);
+    graphics_context_set_text_color(ctx, s_fg);
+    graphics_draw_text(ctx, turnText, font_cind_small, TURNRECT,
+            GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -51,19 +107,15 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-    change_value(false, 1);
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-    change_value(false, -1);
 }
 
 static void up_long_handler(ClickRecognizerRef recognizer, void *context) {
-    change_value(true, 1);
 }
 
 static void down_long_handler(ClickRecognizerRef recognizer, void *context) {
-    change_value(true, -1);
 }
 
 static void back_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -84,40 +136,28 @@ static void click_config_provider(void *context) {
 }
 
 static void window_load(Window *window) {
-    app_log(APP_LOG_LEVEL_DEBUG, "fuckwit.c", 0, "window loading");
     window_set_background_color(window, s_bg);
 
-    // Compute locations of selection boxes and textlayers.
-    int screenheight = layer_get_frame(window_get_root_layer(window)).size.h;
-    int padding = (screenheight - (VALUES * SELECTION_BOX_HEIGHT)) / (VALUES + 1);
+    // Load the fonts.
+    font_cind_small = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_CIND_20));
+    font_cind_large = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_CIND_46));
+    font_symbols = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_GAME_SYMBOLS_40));
 
-    for (int i = 0; i< VALUES; i++)
-    {
-        selectionBox[i].origin.x = 0;
-        selectionBox[i].origin.y = padding + (padding + SELECTION_BOX_HEIGHT) * i;
-        selectionBox[i].size.w = layer_get_frame(window_get_root_layer(window)).size.w;
-        selectionBox[i].size.h = SELECTION_BOX_HEIGHT;
-
-        GRect textframe = selectionBox[i];
-        textframe.origin.x += VALUETEXT_LEFT_OFFSET;
-        textframe.size.w -= VALUETEXT_LEFT_OFFSET;
-        textframe.origin.y += VALUETEXT_TOP_OFFSET;
-        textframe.size.h -= VALUETEXT_TOP_OFFSET;
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "%d text layer at (%d,%d)", i, textframe.origin.x, textframe.origin.y);
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "       size %dx%d", textframe.size.w, textframe.size.h);
-        valueLayer[i] = text_layer_create(textframe);
-        text_layer_set_text_color(valueLayer[i], s_fg);
-        text_layer_set_background_color(valueLayer[i], GColorClear);
-        text_layer_set_text(valueLayer[i],"error");
-        layer_add_child(window_get_root_layer(window), text_layer_get_layer(valueLayer[i]));
-    };
-
-    // Get number of clicks to start with
-    selectedValue = 0;
-    change_value(true, s_clicks);
+    // Add the graphics and selection layers
+    layerGraphics = layer_create(layer_get_frame(window_get_root_layer(window)));
+    layerSelection = layer_create(selectionFrame[0]);
+    layer_set_update_proc(layerGraphics, main_update_proc);
+    layer_set_update_proc(layerSelection, selection_update_proc);
+    layer_add_child(window_get_root_layer(window), layerGraphics);
+    layer_add_child(window_get_root_layer(window), layerSelection);
 }
 
 static void window_unload(Window *window) {
+    fonts_unload_custom_font(font_cind_small);
+    fonts_unload_custom_font(font_cind_large);
+    fonts_unload_custom_font(font_symbols);
+    layer_destroy(layerGraphics);
+    layer_destroy(layerSelection);
 }
 
 void gameWindow_init(GColor bg, GColor fg, int clicks) {
@@ -131,7 +171,6 @@ void gameWindow_init(GColor bg, GColor fg, int clicks) {
     // Get colors.
     s_fg = fg;
     s_bg = bg;
-    s_clicks = clicks;
 
     window_stack_push(window, true);
 }
