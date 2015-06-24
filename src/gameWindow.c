@@ -8,6 +8,7 @@
 #define TEXT_LEN 9
 #define VALUES 2
 #define LONG_CLICK_DURATION 700
+#define MAX_CLICKS 7
 #define CLICKS_Y 19
 #define CLICKS_RADIUS 10
 #define CLICKS_THICKNESS 3
@@ -19,7 +20,7 @@
 #define SELECT_ROUNDING 6
 #define SELECT_ANIMATION_DURATION 250
 #define CREDSYM "\ue600"
-enum {VALUE_CLICKS = 0, VALUE_CREDS = 1, VALUE_CREDS_RECUR = 2};
+enum {VALUE_CLICKS = 0, VALUE_CREDITS = 1};
 
 static Layer* layerGraphics, * layerSelection;
 static Window *window;
@@ -29,8 +30,8 @@ static int credits = 5;
 static int turns = 1;
 static int selectedValue = 0;
 static GFont font_cind_small, font_cind_large, font_symbols;
-static char creditText[TEXT_LEN] = "123";
-static char turnText[TEXT_LEN] = "TURN 6";
+static char creditText[TEXT_LEN] = "1";
+static char turnText[TEXT_LEN] = "TURN 1";
 static GRect selectionFrame[] = {
     (GRect){
         .origin.x = 1,
@@ -112,8 +113,7 @@ static void select_animation_stopped(Animation* animation, bool finished, void* 
         animation_destroy(animation);
     }
 #endif
-    PropertyAnimation** pa = context;
-    *pa = NULL;
+    *(PropertyAnimation**)context = NULL;
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -131,16 +131,53 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
     animation_schedule((Animation*) animation);
 }
 
+static void new_turn(void) {
+    avClicks = totalClicks;
+    turns++;
+    snprintf(turnText, TEXT_LEN, "TURN %u", turns);
+    layer_mark_dirty(layerGraphics);
+}
+
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
+    if (selectedValue == VALUE_CLICKS) {
+        avClicks++;
+        avClicks %= MAX_CLICKS;
+    }
+    else if (selectedValue == VALUE_CREDITS) {
+        credits++;
+        snprintf(creditText, TEXT_LEN, "%u", credits);
+    }
+    layer_mark_dirty(layerGraphics);
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
+    if (selectedValue == VALUE_CLICKS) {
+        avClicks--;
+        if (avClicks <= 0) {
+            avClicks = 0;
+            new_turn();
+        }
+    }
+    else if (selectedValue == VALUE_CREDITS) {
+        credits--;
+        credits = (credits < 0) ? 0 : credits;
+        snprintf(creditText, TEXT_LEN, "%u", credits);
+    }
+    layer_mark_dirty(layerGraphics);
 }
 
 static void up_long_handler(ClickRecognizerRef recognizer, void *context) {
+    if (selectedValue == VALUE_CLICKS) {
+        totalClicks--;
+    }
+    layer_mark_dirty(layerGraphics);
 }
 
 static void down_long_handler(ClickRecognizerRef recognizer, void *context) {
+    if (selectedValue == VALUE_CLICKS) {
+        totalClicks--;
+    }
+    layer_mark_dirty(layerGraphics);
 }
 
 static void back_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -196,6 +233,10 @@ void gameWindow_init(GColor bg, GColor fg, int clicks) {
     // Get colors.
     s_fg = fg;
     s_bg = bg;
+
+    selectedValue = VALUE_CLICKS;
+
+    avClicks = totalClicks = clicks;
 
     window_stack_push(window, true);
 }
