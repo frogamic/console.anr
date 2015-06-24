@@ -150,7 +150,7 @@ static void window_load(Window *window) {
 // #ifdef PBL_PLATFORM_APLITE
     // logofont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FACTION_LOGOS_30));
 // #else
-    logofont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FACTION_LOGOS_46));
+    logofont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_GAME_SYMBOLS_46));
 // #endif
     cyberfont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_CIND_20));
     cardView = CardView_create(window);
