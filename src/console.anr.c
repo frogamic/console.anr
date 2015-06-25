@@ -1,5 +1,11 @@
+/** \file   console.anr.c
+ *  \author Dominic Shelton
+ *  \date   6-6-2015
+ */
+
 #include <pebble.h>
 #include "gameWindow.h"
+#include "fonts.h"
 #include "cardView.h"
 
 #ifdef PBL_COLOR
@@ -20,8 +26,6 @@ enum {CORP, RUNNER, TUTORIAL};
 static Window *window;
 static CardView* cardView;
 static int selectedFaction = 0;
-static GFont logofont;
-static GFont cyberfont;
 
 static GColor faction_get_fg(int faction) {
     switch (faction) {
@@ -107,9 +111,9 @@ static int make_card(CardView* cv, Direction d) {
     // Set font and color.
     text_layer_set_text_color(sublayers[0], faction_get_fg(selectedFaction));
     text_layer_set_text_color(sublayers[1], faction_get_fg(selectedFaction));
-    text_layer_set_font(sublayers[0], cyberfont);
+    text_layer_set_font(sublayers[0], fontCINDSmall);
     text_layer_set_overflow_mode(sublayers[0], GTextOverflowModeWordWrap);
-    text_layer_set_font(sublayers[1], logofont);
+    text_layer_set_font(sublayers[1], fontSymbolLarge);
     // Set name and logo in layers.
     text_layer_set_text(sublayers[0], factionNames[selectedFaction]);
     text_layer_set_text(sublayers[1], factionLogos[selectedFaction]);
@@ -138,15 +142,13 @@ static void click_config_provider(void *context) {
 }
 
 static void window_load(Window *window) {
-    logofont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_GAME_SYMBOLS_46));
-    cyberfont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_CIND_20));
+    fonts_load();
     cardView = CardView_create(window);
     make_card(cardView, FROM_ABOVE);
 }
 
 static void window_unload(Window *window) {
-    fonts_unload_custom_font(logofont);
-    fonts_unload_custom_font(cyberfont);
+    fonts_unload();
     CardView_destroy(cardView);
 }
 

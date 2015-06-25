@@ -3,6 +3,7 @@
  *  \date   8-6-2015
  */
 
+#include "fonts.h"
 #include "gameWindow.h"
 
 #define TEXT_LEN 9
@@ -39,7 +40,6 @@ static int avClicks, totalClicks;
 static int credits = 5;
 static int turns = 1;
 static int selectedValue = 0;
-static GFont font_cind_small, font_cind_large, font_symbols;
 static char creditText[TEXT_LEN] = "5";
 static char turnText[TEXT_LEN] = "TURN 1";
 static GRect selectionFrame[VALUES];
@@ -70,10 +70,10 @@ static void draw_click(GContext* ctx, bool filled, bool perm, int y, int x) {
 static void draw_credit_text(GContext* ctx, const char* credits, int y) {
     GRect credFrame, symFrame;
     credFrame.size = graphics_text_layout_get_content_size(
-        credits, font_cind_large, GRect(0, 0, SCREEN_WIDTH, 50),
+        credits, fontCINDLarge, GRect(0, 0, SCREEN_WIDTH, 50),
         GTextOverflowModeFill, GTextAlignmentLeft);
     symFrame.size = graphics_text_layout_get_content_size(
-        CREDSYM, font_symbols, GRect(0, 0, SCREEN_WIDTH, 50),
+        CREDSYM, fontSymbolSmall, GRect(0, 0, SCREEN_WIDTH, 50),
         GTextOverflowModeFill, GTextAlignmentLeft);
     int credwidth = credFrame.size.w;
     int symwidth = symFrame.size.w;
@@ -84,9 +84,9 @@ static void draw_credit_text(GContext* ctx, const char* credits, int y) {
     credFrame.origin.y = y;
     graphics_context_set_text_color(ctx, s_fg);
     graphics_context_set_fill_color(ctx, GColorClear);
-    graphics_draw_text(ctx, credits, font_cind_large, credFrame,
+    graphics_draw_text(ctx, credits, fontCINDLarge, credFrame,
             GTextOverflowModeFill, GTextAlignmentLeft, NULL);
-    graphics_draw_text(ctx, CREDSYM, font_symbols, symFrame,
+    graphics_draw_text(ctx, CREDSYM, fontSymbolSmall, symFrame,
             GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 }
 
@@ -110,7 +110,7 @@ static void main_update_proc(Layer* layer, GContext* ctx) {
     }
     draw_credit_text(ctx, creditText, CREDITS_Y);
     graphics_context_set_text_color(ctx, s_fg);
-    graphics_draw_text(ctx, turnText, font_cind_small, TURNRECT,
+    graphics_draw_text(ctx, turnText, fontCINDSmall, TURNRECT,
             GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 }
 
@@ -236,11 +236,6 @@ static void window_load(Window *window) {
     windowFrame.origin.y += STATUS_BAR_HEIGHT;
 #endif
 
-    // Load the fonts.
-    font_cind_small = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_CIND_20));
-    font_cind_large = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_CIND_46));
-    font_symbols = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_GAME_SYMBOLS_40));
-
     // Add the graphics and selection layers
     layerGraphics = layer_create(windowFrame);
     layerSelection = layer_create(selectionFrame[0]);
@@ -251,9 +246,6 @@ static void window_load(Window *window) {
 }
 
 static void window_unload(Window *window) {
-    fonts_unload_custom_font(font_cind_small);
-    fonts_unload_custom_font(font_cind_large);
-    fonts_unload_custom_font(font_symbols);
     layer_destroy(layerGraphics);
     layer_destroy(layerSelection);
 #ifdef PBL_PLATFORM_BASALT
