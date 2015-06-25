@@ -9,7 +9,7 @@
 #include "cardView.h"
 
 #ifdef PBL_COLOR
-#define FACTIONS 8
+#define FACTIONS 10
 #else
 #define FACTIONS 3
 #endif
