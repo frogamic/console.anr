@@ -37,6 +37,9 @@ static GFont font_cind_small, font_cind_large, font_symbols;
 static char creditText[TEXT_LEN] = "5";
 static char turnText[TEXT_LEN] = "TURN 1";
 static GRect selectionFrame[VALUES];
+#ifdef PBL_PLATFORM_BASALT
+static StatusBarLayer* statusBar;
+#endif
 
 static void draw_click(GContext* ctx, bool filled, bool perm, int y, int x) {
     GPoint p = GPoint(x + CLICKS_RADIUS, y + CLICKS_RADIUS);
@@ -217,7 +220,13 @@ static void click_config_provider(void *context) {
 }
 
 static void window_load(Window *window) {
+    Layer* root = window_get_root_layer(window);
     window_set_background_color(window, s_bg);
+
+#ifdef PBL_PLATFORM_BASALT
+    statusBar = status_bar_layer_create();
+    layer_add_child(root, status_bar_layer_get_layer(statusBar));
+#endif
 
     // Load the fonts.
     font_cind_small = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_CIND_20));
@@ -229,8 +238,8 @@ static void window_load(Window *window) {
     layerSelection = layer_create(selectionFrame[0]);
     layer_set_update_proc(layerGraphics, main_update_proc);
     layer_set_update_proc(layerSelection, selection_update_proc);
-    layer_add_child(window_get_root_layer(window), layerSelection);
-    layer_add_child(window_get_root_layer(window), layerGraphics);
+    layer_add_child(root, layerSelection);
+    layer_add_child(root, layerGraphics);
 }
 
 static void window_unload(Window *window) {
