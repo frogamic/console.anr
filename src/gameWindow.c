@@ -18,7 +18,7 @@
 #define CREDITS_Y 49
 #define CREDITS_SYMBOL_OFFSET 6
 #define SCREEN_WIDTH 144
-#define TURNRECT (GRect){.size.w=SCREEN_WIDTH, .size.h=30, .origin.x=0, .origin.y=112}
+#define TURNRECT GRect(0, 112, SCREEN_WIDTH, 30)
 #define SELECT_ROUNDING 6
 #define SELECT_ANIMATION_DURATION 250
 #define CREDSYM "\ue600"
@@ -35,22 +35,12 @@ static GFont font_cind_small, font_cind_large, font_symbols;
 static char creditText[TEXT_LEN] = "5";
 static char turnText[TEXT_LEN] = "TURN 1";
 static GRect selectionFrame[] = {
-    (GRect){
-        .origin.x = 1,
-        .origin.y = 14,
-        .size.w = SCREEN_WIDTH - 2,
-        .size.h = 30,
-    },
-    (GRect){
-        .origin.x = 1,
-        .origin.y = 58,
-        .size.w = SCREEN_WIDTH - 2,
-        .size.h = 42,
-    },
+    GRect(1, 14,SCREEN_WIDTH - 2, 30),
+    GRect(1, 58,SCREEN_WIDTH - 2, 42)
 };
 
 static void draw_click(GContext* ctx, bool filled, bool perm, int y, int x) {
-    GPoint p = {.x = x + CLICKS_RADIUS, .y = y + CLICKS_RADIUS};
+    GPoint p = GPoint(x + CLICKS_RADIUS, y + CLICKS_RADIUS);
     if (perm) {
 #ifdef PBL_PLATFORM_APLITE
         graphics_context_set_fill_color(ctx, s_fg);
@@ -72,10 +62,10 @@ static void draw_click(GContext* ctx, bool filled, bool perm, int y, int x) {
 static void draw_credit_text(GContext* ctx, const char* credits, int y) {
     GRect credFrame, symFrame;
     credFrame.size = graphics_text_layout_get_content_size(
-        credits, font_cind_large, (GRect){.size.w = SCREEN_WIDTH, .size.h = 50},
+        credits, font_cind_large, GRect(0, 0, SCREEN_WIDTH, 50),
         GTextOverflowModeFill, GTextAlignmentLeft);
     symFrame.size = graphics_text_layout_get_content_size(
-        CREDSYM, font_symbols, (GRect){.size.w = SCREEN_WIDTH, .size.h = 50},
+        CREDSYM, font_symbols, GRect(0, 0, SCREEN_WIDTH, 50),
         GTextOverflowModeFill, GTextAlignmentLeft);
     int credwidth = credFrame.size.w;
     int symwidth = symFrame.size.w;
@@ -94,7 +84,7 @@ static void draw_credit_text(GContext* ctx, const char* credits, int y) {
 
 static void selection_update_proc(Layer* layer, GContext* ctx) {
     GRect rect = layer_get_frame(layer);
-    rect.origin = (GPoint){.x = 0, .y = 0};
+    rect.origin = GPointZero;
 #ifdef PBL_COLOR
     graphics_context_set_fill_color(ctx, (GColor){.argb = ~(s_fg.argb) | 0b11000000});
     graphics_fill_rect(ctx, rect, SELECT_ROUNDING, GCornersAll);
