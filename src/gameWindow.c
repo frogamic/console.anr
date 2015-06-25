@@ -9,6 +9,7 @@
 #define VALUES 2
 #define LONG_CLICK_DURATION 500
 #define MAX_CLICKS 6
+#define STATUS_BAR_HEIGHT 16
 #define CLICKS_Y 19
 #define CLICKS_RADIUS 10
 #define CLICKS_THICKNESS 3
@@ -19,8 +20,13 @@
 #define CREDITS_SYMBOL_OFFSET 6
 #define SCREEN_WIDTH 144
 #define TURNRECT GRect(0, 112, SCREEN_WIDTH, 30)
+#ifdef PBL_PLATFORM_BASALT
+#define SELECT_RECT_0 GRect(1, 14 + STATUS_BAR_HEIGHT, SCREEN_WIDTH - 2, 30)
+#define SELECT_RECT_1 GRect(1, 58 + STATUS_BAR_HEIGHT, SCREEN_WIDTH - 2, 42)
+#else
 #define SELECT_RECT_0 GRect(1, 14, SCREEN_WIDTH - 2, 30)
 #define SELECT_RECT_1 GRect(1, 58, SCREEN_WIDTH - 2, 42)
+#endif
 #define SELECT_ROUNDING 6
 #define SELECT_ANIMATION_DURATION 250
 #define CREDSYM "\ue600"
@@ -222,10 +228,12 @@ static void click_config_provider(void *context) {
 static void window_load(Window *window) {
     Layer* root = window_get_root_layer(window);
     window_set_background_color(window, s_bg);
+    GRect windowFrame = layer_get_frame(root);
 
 #ifdef PBL_PLATFORM_BASALT
     statusBar = status_bar_layer_create();
     layer_add_child(root, status_bar_layer_get_layer(statusBar));
+    windowFrame.origin.y += STATUS_BAR_HEIGHT;
 #endif
 
     // Load the fonts.
@@ -234,7 +242,7 @@ static void window_load(Window *window) {
     font_symbols = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_GAME_SYMBOLS_40));
 
     // Add the graphics and selection layers
-    layerGraphics = layer_create(layer_get_frame(window_get_root_layer(window)));
+    layerGraphics = layer_create(windowFrame);
     layerSelection = layer_create(selectionFrame[0]);
     layer_set_update_proc(layerGraphics, main_update_proc);
     layer_set_update_proc(layerSelection, selection_update_proc);
