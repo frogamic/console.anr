@@ -256,6 +256,9 @@ static void window_unload(Window *window) {
     fonts_unload_custom_font(font_symbols);
     layer_destroy(layerGraphics);
     layer_destroy(layerSelection);
+#ifdef PBL_PLATFORM_BASALT
+    status_bar_layer_destroy(statusBar);
+#endif
 }
 
 void gameWindow_init(GColor bg, GColor fg, int clicks) {
