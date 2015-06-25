@@ -13,7 +13,7 @@
 #define HB_TEXTHEIGHT 20
 
 #ifdef PBL_COLOR
-enum {ANARCH, CRIMINAL, JINTEKI, HAAS, NBN, SHAPER, WEYLAND, TUTORIAL};
+enum {CORP, RUNNER, ANARCH, CRIMINAL, JINTEKI, HAAS, NBN, SHAPER, WEYLAND, TUTORIAL};
 #else
 enum {CORP, RUNNER, TUTORIAL};
 #endif
@@ -24,25 +24,23 @@ static GFont logofont;
 static GFont cyberfont;
 
 static GColor faction_get_fg(int faction) {
-#ifdef PBL_COLOR
     switch (faction) {
+        case CORP: return GColorWhite;
+#ifdef PBL_COLOR
         case CRIMINAL: return GColorWhite;
         case JINTEKI: return GColorWhite;
         case HAAS: return GColorWhite;
         case WEYLAND: return GColorWhite;
         case TUTORIAL: return GColorWhite;
-    };
-#else
-    switch (faction) {
-        case RUNNER: return GColorWhite;
-    }
 #endif
-    return GColorBlack;
+        default: return GColorBlack;
+    };
 }
 
 static GColor faction_get_color(int faction) {
-#ifdef PBL_COLOR
     switch (faction) {
+        case CORP: return GColorBlack;
+#ifdef PBL_COLOR
         case ANARCH: return GColorRed;
         case CRIMINAL: return GColorBlue;
         case JINTEKI: return GColorDarkCandyAppleRed;
@@ -51,18 +49,14 @@ static GColor faction_get_color(int faction) {
         case SHAPER: return GColorKellyGreen;
         case WEYLAND: return GColorMidnightGreen;
         case TUTORIAL: return GColorDarkGray;
-    };
-#else
-    switch (faction) {
-        case RUNNER: return GColorBlack;
-    }
 #endif
-    return GColorWhite;
+        default: return GColorWhite;
+    };
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 #ifdef PBL_COLOR
-    int clicks[] = {4, 4, 3, 3, 3, 4, 3, 0};
+    int clicks[] = {3, 4, 4, 4, 3, 3, 3, 4, 3, 0};
 #else
     int clicks[] = {3, 4, 0};
 #endif
@@ -81,8 +75,8 @@ static void destroy_card(void* context) {
 
 static int make_card(CardView* cv, Direction d) {
 #ifdef PBL_COLOR
-    const char* factionLogos[] = {"\ue605", "\ue612", "\ue005", "\ue602", "\ue60b", "\ue613", "\ue607", "\ue611\ue600"};
-    const char* factionNames[] = {"ANARCH", "CRIMINAL", "JINTEKI", "HAAS-\nBIOROID", "NBN", "SHAPER", "WEYLAND", "TUTORIAL"};
+    const char* factionLogos[] = {"\ue005\ue602\n\ue60b\ue607", "\ue605\ue612\ue613", "\ue605", "\ue612", "\ue005", "\ue602", "\ue60b", "\ue613", "\ue607", "\ue611\ue600"};
+    const char* factionNames[] = {"CORP", "RUNNER", "ANARCH", "CRIMINAL", "JINTEKI", "HAAS-\nBIOROID", "NBN", "SHAPER", "WEYLAND", "TUTORIAL"};
 #else
     const char* factionLogos[] = {"\ue005\ue602\n\ue60b\ue607", "\ue605\ue612\ue613", "\ue611\ue600"};
     const char* factionNames[] = {"CORP", "RUNNER", "TUTORIAL"};
@@ -96,17 +90,14 @@ static int make_card(CardView* cv, Direction d) {
 #ifdef PBL_COLOR
     // If the text is HB, move up for the two lines
     if (selectedFaction == HAAS) frame.origin.y -= HB_TEXTHEIGHT;
-#else
+#endif
     // If the corp is selected move the text down to make room for the logos.
     if (selectedFaction == CORP) frame.origin.y += LOGO_Y / 2;
-#endif
     sublayers[0] = text_layer_create(frame);
     frame.origin.y = LOGO_Y;
     frame.size.h = LOGO_HEIGHT;
-#ifndef PBL_COLOR
     // If the corp is selected move the logos up to make room for both lines.
     if (selectedFaction == CORP) frame.origin.y-= LOGO_Y / 2;
-#endif
     sublayers[1] = text_layer_create(frame);
     // Set both text layers to transparent and centered.
     text_layer_set_background_color(sublayers[0], GColorClear);
@@ -147,11 +138,7 @@ static void click_config_provider(void *context) {
 }
 
 static void window_load(Window *window) {
-// #ifdef PBL_PLATFORM_APLITE
-    // logofont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FACTION_LOGOS_30));
-// #else
     logofont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_GAME_SYMBOLS_46));
-// #endif
     cyberfont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_CIND_20));
     cardView = CardView_create(window);
     make_card(cardView, FROM_ABOVE);
