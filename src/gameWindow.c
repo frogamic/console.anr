@@ -19,6 +19,8 @@
 #define CREDITS_SYMBOL_OFFSET 6
 #define SCREEN_WIDTH 144
 #define TURNRECT GRect(0, 112, SCREEN_WIDTH, 30)
+#define SELECT_RECT_0 GRect(1, 14, SCREEN_WIDTH - 2, 30)
+#define SELECT_RECT_1 GRect(1, 58, SCREEN_WIDTH - 2, 42)
 #define SELECT_ROUNDING 6
 #define SELECT_ANIMATION_DURATION 250
 #define CREDSYM "\ue600"
@@ -34,10 +36,7 @@ static int selectedValue = 0;
 static GFont font_cind_small, font_cind_large, font_symbols;
 static char creditText[TEXT_LEN] = "5";
 static char turnText[TEXT_LEN] = "TURN 1";
-static GRect selectionFrame[] = {
-    GRect(1, 14,SCREEN_WIDTH - 2, 30),
-    GRect(1, 58,SCREEN_WIDTH - 2, 42)
-};
+static GRect selectionFrame[VALUES];
 
 static void draw_click(GContext* ctx, bool filled, bool perm, int y, int x) {
     GPoint p = GPoint(x + CLICKS_RADIUS, y + CLICKS_RADIUS);
@@ -250,6 +249,9 @@ void gameWindow_init(GColor bg, GColor fg, int clicks) {
         .load = window_load,
         .unload = window_unload,
     });
+
+    selectionFrame[0] = SELECT_RECT_0;
+    selectionFrame[1] = SELECT_RECT_1;
 
     // Get colors.
     s_fg = fg;
