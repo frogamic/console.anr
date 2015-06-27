@@ -36,6 +36,9 @@ enum {VALUE_CLICKS = 0, VALUE_CREDITS = 1};
 static Layer* layerGraphics, * layerSelection;
 static Window *window;
 static GColor s_fg, s_bg;
+#ifdef PBL_COLOR
+static GColor s_highlight;
+#endif
 static int avClicks, totalClicks;
 static int credits = 5;
 static int turns = 1;
@@ -90,11 +93,28 @@ static void draw_credit_text(GContext* ctx, const char* credits, int y) {
             GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 }
 
+#ifdef PBL_COLOR
+inline GColor get_highlight(GColor color) {
+    switch (color.argb) {
+        case GColorRedARGB8: return GColorSunsetOrange;
+        case GColorBlueARGB8: return GColorDukeBlue;
+        case GColorDarkCandyAppleRedARGB8: return GColorBulgarianRose;
+        case GColorImperialPurpleARGB8: return GColorOxfordBlue;
+        case GColorChromeYellowARGB8: return GColorYellow;
+        case GColorKellyGreenARGB8: return GColorInchworm;
+        case GColorMidnightGreenARGB8: return GColorDarkGreen;
+        case GColorWhiteARGB8: return GColorLightGray;
+        case GColorBlackARGB8: return GColorDarkGray;
+    }
+    return GColorBlack;
+}
+#endif
+
 static void selection_update_proc(Layer* layer, GContext* ctx) {
     GRect rect = layer_get_frame(layer);
     rect.origin = GPointZero;
 #ifdef PBL_COLOR
-    graphics_context_set_fill_color(ctx, (GColor){.argb = ~(s_fg.argb) | 0b11000000});
+    graphics_context_set_fill_color(ctx, s_highlight);
     graphics_fill_rect(ctx, rect, SELECT_ROUNDING, GCornersAll);
 #endif
     graphics_context_set_stroke_color(ctx, s_fg);
@@ -268,6 +288,9 @@ void gameWindow_init(GColor bg, GColor fg, int clicks) {
     // Get colors.
     s_fg = fg;
     s_bg = bg;
+#ifdef PBL_COLOR
+    s_highlight = get_highlight(s_bg);
+#endif
 
     selectedValue = VALUE_CLICKS;
 
