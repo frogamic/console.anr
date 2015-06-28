@@ -102,7 +102,7 @@ inline GColor get_highlight(GColor color) {
         case GColorImperialPurpleARGB8: return GColorOxfordBlue;
         case GColorChromeYellowARGB8: return GColorYellow;
         case GColorKellyGreenARGB8: return GColorInchworm;
-        case GColorMidnightGreenARGB8: return GColorDarkGreen;
+        case GColorMidnightGreenARGB8: return GColorDarkGray;
         case GColorWhiteARGB8: return GColorLightGray;
         case GColorBlackARGB8: return GColorDarkGray;
     }
