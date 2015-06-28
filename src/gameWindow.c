@@ -46,6 +46,7 @@ static int selectedValue = 0;
 static char creditText[TEXT_LEN] = "5";
 static char turnText[TEXT_LEN] = "TURN 1";
 static GRect selectionFrame[VALUES];
+static bool exiting = false;
 #ifdef PBL_PLATFORM_BASALT
 static StatusBarLayer* statusBar;
 #endif
@@ -229,11 +230,16 @@ static void down_long_handler(ClickRecognizerRef recognizer, void *context) {
 }
 
 static void back_click_handler(ClickRecognizerRef recognizer, void *context) {
-    static bool pressed = false;
-    if (pressed) window_stack_pop(true);
-    else {
-        pressed = true;
+    if (exiting) {
+        gameWindow_deinit();
     }
+    else {
+        exiting = true;
+    }
+}
+
+static void click_config_provider_tutorial(void *context) {
+    window_single_click_subscribe(BUTTON_ID_BACK, back_click_handler);
 }
 
 static void click_config_provider(void *context) {
@@ -275,7 +281,9 @@ static void window_unload(Window *window) {
 
 void gameWindow_init(GColor bg, GColor fg, int clicks) {
     window = window_create();
-    if (clicks != 0)
+    if (clicks == 0)
+        window_set_click_config_provider(window, click_config_provider_tutorial);
+    else
         window_set_click_config_provider(window, click_config_provider);
     window_set_window_handlers(window, (WindowHandlers) {
         .load = window_load,
@@ -300,10 +308,14 @@ void gameWindow_init(GColor bg, GColor fg, int clicks) {
 
     reprint_text(false);
 
+    APP_LOG(APP_LOG_LEVEL_INFO, "Done initializing, pushed window: %p", window);
+
     window_stack_push(window, true);
 }
 
 void gameWindow_deinit(void) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "De-initializing, destroying window: %p", window);
+    window_stack_remove(window, true);
     window_destroy(window);
 }
 

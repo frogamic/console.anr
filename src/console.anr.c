@@ -160,19 +160,19 @@ static void init(void) {
         .unload = window_unload,
     });
     window_stack_push(window, true);
+    APP_LOG(APP_LOG_LEVEL_INFO, "Done initializing, pushed window: %p", window);
 }
 
 static void deinit(void) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "De-initializing, destroying window: %p", window);
     window_destroy(window);
 }
 
 int main(void) {
     init();
 
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Done initializing, pushed window: %p", window);
-
     app_event_loop();
-    gameWindow_deinit();
+
     deinit();
 }
 
