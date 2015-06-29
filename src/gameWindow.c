@@ -279,19 +279,21 @@ static void window_load(Window *window) {
     window_set_background_color(window, s_bg);
     GRect windowFrame = layer_get_frame(root);
 
+    // Add the graphics and selection layers
 #ifdef PBL_PLATFORM_BASALT
-    statusBar = status_bar_layer_create();
-    layer_add_child(root, status_bar_layer_get_layer(statusBar));
     windowFrame.origin.y += STATUS_BAR_LAYER_HEIGHT;
 #endif
-
-    // Add the graphics and selection layers
     layerGraphics = layer_create(windowFrame);
     layerSelection = layer_create(selectionFrame[0]);
     layer_set_update_proc(layerGraphics, main_update_proc);
     layer_set_update_proc(layerSelection, selection_update_proc);
     layer_add_child(root, layerSelection);
     layer_add_child(root, layerGraphics);
+
+#ifdef PBL_PLATFORM_BASALT
+    statusBar = status_bar_layer_create();
+    layer_add_child(root, status_bar_layer_get_layer(statusBar));
+#endif
 }
 
 static void window_unload(Window *window) {
