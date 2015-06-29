@@ -10,7 +10,6 @@
 #define VALUES 2
 #define LONG_CLICK_DURATION 500
 #define MAX_CLICKS 6
-#define STATUS_BAR_HEIGHT 16
 #define CLICKS_Y 19
 #define CLICKS_RADIUS 10
 #define CLICKS_THICKNESS 3
@@ -20,15 +19,19 @@
 #define CREDITS_Y 49
 #define CREDITS_SYMBOL_OFFSET 6
 #define SCREEN_WIDTH 144
-#define TURNRECT GRect(0, 112, SCREEN_WIDTH, 30)
+#define TURN_RECT GRect(0, 112, SCREEN_WIDTH, 30)
 #ifdef PBL_PLATFORM_BASALT
-#define SELECT_RECT_0 GRect(1, 14 + STATUS_BAR_HEIGHT, SCREEN_WIDTH - 2, 30)
-#define SELECT_RECT_1 GRect(1, 58 + STATUS_BAR_HEIGHT, SCREEN_WIDTH - 2, 42)
+#define SELECT_RECT_0 GRect(1, 14 + STATUS_BAR_LAYER_HEIGHT, SCREEN_WIDTH - 2, 30)
+#define SELECT_RECT_1 GRect(1, 58 + STATUS_BAR_LAYER_HEIGHT, SCREEN_WIDTH - 2, 42)
+#define EXIT_RECT GRect(1, 14 + STATUS_BAR_LAYER_HEIGHT, SCREEN_WIDTH - 2, 66)
 #else
 #define SELECT_RECT_0 GRect(1, 14, SCREEN_WIDTH - 2, 30)
 #define SELECT_RECT_1 GRect(1, 58, SCREEN_WIDTH - 2, 42)
+#define EXIT_RECT GRect(1, 14, SCREEN_WIDTH - 2, 66)
 #endif
-#define SELECT_ROUNDING 6
+#define EXIT_OUT_RECT GRect(1, -66, SCREEN_WIDTH - 2, 66)
+#define EXIT_ANIMATION_DURATION 1500
+#define ROUNDING 6
 #define SELECT_ANIMATION_DURATION 250
 #define CREDSYM "\ue600"
 enum {VALUE_CLICKS = 0, VALUE_CREDITS = 1};
@@ -46,7 +49,7 @@ static int selectedValue = 0;
 static char creditText[TEXT_LEN] = "5";
 static char turnText[TEXT_LEN] = "TURN 1";
 static GRect selectionFrame[VALUES];
-static bool exiting = false;
+static PropertyAnimation* animationExiting = NULL;
 #ifdef PBL_PLATFORM_BASALT
 static StatusBarLayer* statusBar;
 #endif
@@ -69,6 +72,18 @@ static void draw_click(GContext* ctx, bool filled, bool perm, int y, int x) {
         graphics_context_set_fill_color(ctx, s_fg);
         graphics_fill_circle(ctx, p, CLICKS_FILL_RADIUS);
     }
+}
+
+static void exit_update_proc(Layer* layer, GContext* ctx) {
+    GRect rect = layer_get_frame(layer);
+    rect.origin = GPointZero;
+    graphics_context_set_fill_color(ctx, s_bg);
+    graphics_context_set_text_color(ctx, s_fg);
+    graphics_context_set_stroke_color(ctx, s_fg);
+    graphics_fill_rect(ctx, rect, ROUNDING, GCornersAll);
+    graphics_draw_round_rect(ctx, rect, ROUNDING);
+    graphics_draw_text(ctx, "PRESS AGAIN TO EXIT", fontCINDSmall, rect,
+            GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 }
 
 static void draw_credit_text(GContext* ctx, const char* credits, int y) {
@@ -94,32 +109,15 @@ static void draw_credit_text(GContext* ctx, const char* credits, int y) {
             GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 }
 
-#ifdef PBL_COLOR
-inline GColor get_highlight(GColor color) {
-    switch (color.argb) {
-        case GColorRedARGB8: return GColorSunsetOrange;
-        case GColorBlueARGB8: return GColorDukeBlue;
-        case GColorDarkCandyAppleRedARGB8: return GColorBulgarianRose;
-        case GColorImperialPurpleARGB8: return GColorOxfordBlue;
-        case GColorChromeYellowARGB8: return GColorYellow;
-        case GColorKellyGreenARGB8: return GColorInchworm;
-        case GColorMidnightGreenARGB8: return GColorDarkGray;
-        case GColorWhiteARGB8: return GColorLightGray;
-        case GColorBlackARGB8: return GColorDarkGray;
-    }
-    return GColorBlack;
-}
-#endif
-
 static void selection_update_proc(Layer* layer, GContext* ctx) {
     GRect rect = layer_get_frame(layer);
     rect.origin = GPointZero;
 #ifdef PBL_COLOR
     graphics_context_set_fill_color(ctx, s_highlight);
-    graphics_fill_rect(ctx, rect, SELECT_ROUNDING, GCornersAll);
+    graphics_fill_rect(ctx, rect, ROUNDING, GCornersAll);
 #endif
     graphics_context_set_stroke_color(ctx, s_fg);
-    graphics_draw_round_rect(ctx, rect, SELECT_ROUNDING);
+    graphics_draw_round_rect(ctx, rect, ROUNDING);
 }
 
 static void main_update_proc(Layer* layer, GContext* ctx) {
@@ -131,8 +129,18 @@ static void main_update_proc(Layer* layer, GContext* ctx) {
     }
     draw_credit_text(ctx, creditText, CREDITS_Y);
     graphics_context_set_text_color(ctx, s_fg);
-    graphics_draw_text(ctx, turnText, fontCINDSmall, TURNRECT,
+    graphics_draw_text(ctx, turnText, fontCINDSmall, TURN_RECT,
             GTextOverflowModeFill, GTextAlignmentCenter, NULL);
+}
+
+static void exit_animation_stopped(Animation* animation, bool finished, void* data) {
+#ifdef PBL_PLATFORM_APLITE
+    if (finished) {
+        animation_destroy(animation);
+    }
+#endif
+    layer_destroy((Layer*)data);
+    animationExiting = NULL;
 }
 
 static void select_animation_stopped(Animation* animation, bool finished, void* context) {
@@ -144,6 +152,7 @@ static void select_animation_stopped(Animation* animation, bool finished, void* 
     *(PropertyAnimation**)context = NULL;
 }
 static void reprint_text (bool markDirty) {
+    animationExiting = false;
     static int lastCredits = 0;
     static int lastTurns = 0;
     if (credits != lastCredits) {
@@ -158,21 +167,6 @@ static void reprint_text (bool markDirty) {
         if (markDirty)
             layer_mark_dirty(layerGraphics);
     }
-}
-
-static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-    selectedValue = (selectedValue + 1) % VALUES;
-    static PropertyAnimation* animation = NULL;
-   
-    if (animation != NULL)
-       animation_destroy((Animation*)animation);
-    animation = property_animation_create_layer_frame(layerSelection, NULL,
-            &selectionFrame[selectedValue]);
-    animation_set_curve((Animation*) animation, AnimationCurveEaseOut);
-    animation_set_duration((Animation*) animation, SELECT_ANIMATION_DURATION);
-    animation_set_handlers((Animation*) animation, (AnimationHandlers){
-            .stopped = select_animation_stopped}, &animation);
-    animation_schedule((Animation*) animation);
 }
 
 static void new_turn(void) {
@@ -229,12 +223,37 @@ static void down_long_handler(ClickRecognizerRef recognizer, void *context) {
     down_click_handler(recognizer, context);
 }
 
+static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+    selectedValue = (selectedValue + 1) % VALUES;
+    static PropertyAnimation* animation = NULL;
+
+    if (animation != NULL)
+       animation_destroy((Animation*)animation);
+    animation = property_animation_create_layer_frame(layerSelection, NULL,
+            &selectionFrame[selectedValue]);
+    animation_set_curve((Animation*) animation, AnimationCurveEaseOut);
+    animation_set_duration((Animation*) animation, SELECT_ANIMATION_DURATION);
+    animation_set_handlers((Animation*) animation, (AnimationHandlers){
+            .stopped = select_animation_stopped}, &animation);
+    animation_schedule((Animation*) animation);
+}
+
 static void back_click_handler(ClickRecognizerRef recognizer, void *context) {
-    if (exiting) {
+    if (animationExiting) {
         gameWindow_deinit();
     }
     else {
-        exiting = true;
+        Layer* layer = layer_create(EXIT_RECT);
+        GRect rect = EXIT_OUT_RECT;
+        layer_set_update_proc(layer, exit_update_proc);
+        layer_add_child(window_get_root_layer(window), layer);
+        animationExiting = property_animation_create_layer_frame(layer, NULL,
+                &rect);
+        animation_set_curve((Animation*) animationExiting, AnimationCurveEaseIn);
+        animation_set_duration((Animation*) animationExiting, EXIT_ANIMATION_DURATION);
+        animation_set_handlers((Animation*) animationExiting, (AnimationHandlers){
+                .stopped = exit_animation_stopped}, layer);
+        animation_schedule((Animation*) animationExiting);
     }
 }
 
@@ -259,7 +278,7 @@ static void window_load(Window *window) {
 #ifdef PBL_PLATFORM_BASALT
     statusBar = status_bar_layer_create();
     layer_add_child(root, status_bar_layer_get_layer(statusBar));
-    windowFrame.origin.y += STATUS_BAR_HEIGHT;
+    windowFrame.origin.y += STATUS_BAR_LAYER_HEIGHT;
 #endif
 
     // Add the graphics and selection layers
@@ -272,12 +291,31 @@ static void window_load(Window *window) {
 }
 
 static void window_unload(Window *window) {
+    if (animationExiting)
+        property_animation_destroy(animationExiting);
     layer_destroy(layerGraphics);
     layer_destroy(layerSelection);
 #ifdef PBL_PLATFORM_BASALT
     status_bar_layer_destroy(statusBar);
 #endif
 }
+
+#ifdef PBL_COLOR
+inline GColor get_highlight(GColor color) {
+    switch (color.argb) {
+        case GColorRedARGB8: return GColorSunsetOrange;
+        case GColorBlueARGB8: return GColorDukeBlue;
+        case GColorDarkCandyAppleRedARGB8: return GColorBulgarianRose;
+        case GColorImperialPurpleARGB8: return GColorOxfordBlue;
+        case GColorChromeYellowARGB8: return GColorYellow;
+        case GColorKellyGreenARGB8: return GColorInchworm;
+        case GColorMidnightGreenARGB8: return GColorDarkGray;
+        case GColorWhiteARGB8: return GColorLightGray;
+        case GColorBlackARGB8: return GColorDarkGray;
+    }
+    return GColorBlack;
+}
+#endif
 
 void gameWindow_init(GColor bg, GColor fg, int clicks) {
     window = window_create();
