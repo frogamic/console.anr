@@ -40,7 +40,7 @@
                 "type": "font"
             },
             {
-                "characterRegex": "[-ABCDEHIJKLMNOPRSTUWY0-9 ]",
+                "characterRegex": "[-ABCDEGHIJKLMNOPRSTUWXY0-9 ]",
                 "file": "fonts/CIND.ttf",
                 "name": "CIND_20",
                 "type": "font"
