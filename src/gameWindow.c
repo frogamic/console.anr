@@ -246,7 +246,11 @@ static void back_click_handler(ClickRecognizerRef recognizer, void *context) {
         Layer* layer = layer_create(EXIT_RECT);
         GRect rect = EXIT_OUT_RECT;
         layer_set_update_proc(layer, exit_update_proc);
+#ifdef PBL_PLATFORM_BASALT
+        layer_insert_below_sibling(layer, status_bar_layer_get_layer(statusBar));
+#else
         layer_add_child(window_get_root_layer(window), layer);
+#endif
         animationExiting = property_animation_create_layer_frame(layer, NULL,
                 &rect);
         animation_set_curve((Animation*) animationExiting, AnimationCurveEaseIn);
